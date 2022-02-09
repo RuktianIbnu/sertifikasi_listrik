@@ -11,7 +11,7 @@ import (
 type Repository interface {
 	Create(data *model.Tarif) (int64, error)
 	GetOneByID(id int64) ([]*model.Tarif, error)
-	// GetAllByID(id int64) (*model.Tarif, error)
+	GetAllByID(id int64) (*model.Tarif, error)
 	UpdateOneByID(data *model.Tarif) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Tarif, int, error)
@@ -117,27 +117,26 @@ func (m *repository) GetOneByID(id int64) ([]*model.Tarif, error) {
 	return list_data, nil
 }
 
-// func (m *repository) GetAllByID(id int64) (*model.Tarif, error) {
-// 	query := `SELECT
-// 	id,
-// 	COALESCE(kode_seksi, ''),
-// 	COALESCE(nama_seksi, ''),
-// 	id_parent_subdirektorat
-// 	FROM tarif
-// 	WHERE id = ?`
+func (m *repository) GetAllByID(id int64) (*model.Tarif, error) {
+	query := `SELECT
+	id_tarif, 
+	daya,
+	tarifperkwh
+	FROM tarif
+	WHERE id_tarif = ?`
 
-// 	data := &model.Tarif{}
+	data := &model.Tarif{}
 
-// 	if err := m.DB.QueryRow(query, id).Scan(
-// 		&data.ID,
-// 		&data.Kodesubdirektorat,
-// 		&data.Namasubdirektorat,
-// 	); err != nil {
-// 		return nil, err
-// 	}
+	if err := m.DB.QueryRow(query, id).Scan(
+		&data.ID,
+		&data.Daya,
+		&data.Tarif,
+	); err != nil {
+		return nil, err
+	}
 
-// 	return data, nil
-// }
+	return data, nil
+}
 
 func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tarif, int, error) {
 	var (

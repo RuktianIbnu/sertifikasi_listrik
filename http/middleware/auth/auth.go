@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"epiket-api/pkg/helper/jwt"
-	resp "epiket-api/pkg/helper/response"
+	"sertifikasi_listrik/pkg/helper/jwt"
+	resp "sertifikasi_listrik/pkg/helper/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,15 +39,10 @@ func Middleware() gin.HandlerFunc {
 
 		// token valid and forward to original request
 
-		c.Set("id", metadata.IDUser)
-		c.Set("nip", metadata.NIP)
-		c.Set("nama", metadata.Nama)
-		c.Set("no_hp", metadata.Nohp)
-		c.Set("photo", metadata.Photo)
-		c.Set("id_subdirektorat", metadata.IDsubdirektorat)
-		c.Set("id_seksi", metadata.IDseksi)
-		c.Set("level_pengguna", metadata.Levelpengguna)
-		c.Set("aktif", metadata.Aktif)
+		c.Set("id_user", metadata.Id_user)
+		c.Set("username", metadata.Username)
+		c.Set("nama_admin", metadata.Nama_admin)
+		c.Set("id_level", metadata.Id_level)
 
 		c.Next()
 
