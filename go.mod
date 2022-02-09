@@ -1,4 +1,4 @@
-module epiket-api
+module sertifikasi_listrik
 
 go 1.16
 

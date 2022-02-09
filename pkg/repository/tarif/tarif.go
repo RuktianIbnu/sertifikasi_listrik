@@ -1,20 +1,20 @@
-package subdirektorat
+package tarif
 
 import (
-	"epiket-api/pkg/helper"
-	"epiket-api/pkg/model"
+	"sertifikasi_listrik/pkg/helper"
+	"sertifikasi_listrik/pkg/model"
 
 	"github.com/jmoiron/sqlx"
 )
 
 // Repository ...
 type Repository interface {
-	Create(data *model.Subdirektorat) (int64, error)
-	GetOneByID(id int64) ([]*model.Subdirektorat, error)
-	// GetAllByID(id int64) (*model.Subdirektorat, error)
-	UpdateOneByID(data *model.Subdirektorat) (int64, error)
+	Create(data *model.Tarif) (int64, error)
+	GetOneByID(id int64) ([]*model.Tarif, error)
+	// GetAllByID(id int64) (*model.Tarif, error)
+	UpdateOneByID(data *model.Tarif) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
-	GetAll(dqp *model.DefaultQueryParam) ([]*model.Subdirektorat, int, error)
+	GetAll(dqp *model.DefaultQueryParam) ([]*model.Tarif, int, error)
 	getTotalCount() (totalEntries int)
 }
 
@@ -30,20 +30,20 @@ func NewRepository() Repository {
 }
 
 func (m *repository) getTotalCount() (totalEntries int) {
-	if err := m.DB.QueryRow("SELECT COUNT(*) FROM ms_subdirektorat").Scan(&totalEntries); err != nil {
+	if err := m.DB.QueryRow("SELECT COUNT(*) FROM tarif").Scan(&totalEntries); err != nil {
 		return -1
 	}
 
 	return totalEntries
 }
 
-func (m *repository) Create(data *model.Subdirektorat) (int64, error) {
-	query := `INSERT INTO ms_subdirektorat(
-		kode_subdirektorat, nama_subdirektorat) VALUES(?, ?)`
+func (m *repository) Create(data *model.Tarif) (int64, error) {
+	query := `INSERT INTO tarif(
+		daya, tarifperkwh) VALUES(?)`
 
 	res, err := m.DB.Exec(query,
-		&data.Kodesubdirektorat,
-		&data.Namasubdirektorat,
+		&data.Daya,
+		&data.Tarif,
 	)
 
 	if err != nil {
@@ -58,14 +58,13 @@ func (m *repository) Create(data *model.Subdirektorat) (int64, error) {
 	return lastID, nil
 }
 
-func (m *repository) UpdateOneByID(data *model.Subdirektorat) (int64, error) {
-	query := `UPDATE ms_subdirektorat set
-	kode_subdirektorat = ?, nama_subdirektorat = ?
-	WHERE id = ?`
+func (m *repository) UpdateOneByID(data *model.Tarif) (int64, error) {
+	query := `UPDATE tarif set daya = ?, tarifperkwh = ?
+	WHERE id_tarif = ?`
 
 	res, err := m.DB.Exec(query,
-		data.Kodesubdirektorat,
-		data.Namasubdirektorat,
+		data.Daya,
+		data.Tarif,
 		data.ID,
 	)
 
@@ -81,17 +80,17 @@ func (m *repository) UpdateOneByID(data *model.Subdirektorat) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (m *repository) GetOneByID(id int64) ([]*model.Subdirektorat, error) {
+func (m *repository) GetOneByID(id int64) ([]*model.Tarif, error) {
 	var (
-		list_data = make([]*model.Subdirektorat, 0)
+		list_data = make([]*model.Tarif, 0)
 	)
 
 	query := `SELECT 
-	id, 
-	kode_subdirektorat, 
-	COALESCE(nama_subdirektorat, '')
-	FROM ms_subdirektorat  
-	WHERE id = ?`
+	id_tarif, 
+	daya,
+	tarifperkwh
+	FROM tarif  
+	WHERE id_tarif = ?`
 
 	rows, err := m.DB.Query(query, id)
 	if err != nil {
@@ -101,13 +100,13 @@ func (m *repository) GetOneByID(id int64) ([]*model.Subdirektorat, error) {
 
 	for rows.Next() {
 		var (
-			data model.Subdirektorat
+			data model.Tarif
 		)
 
 		if err := rows.Scan(
 			&data.ID,
-			&data.Kodesubdirektorat,
-			&data.Namasubdirektorat,
+			&data.Daya,
+			&data.Tarif,
 		); err != nil {
 			return nil, err
 		}
@@ -118,16 +117,16 @@ func (m *repository) GetOneByID(id int64) ([]*model.Subdirektorat, error) {
 	return list_data, nil
 }
 
-// func (m *repository) GetAllByID(id int64) (*model.Subdirektorat, error) {
+// func (m *repository) GetAllByID(id int64) (*model.Tarif, error) {
 // 	query := `SELECT
 // 	id,
 // 	COALESCE(kode_seksi, ''),
 // 	COALESCE(nama_seksi, ''),
 // 	id_parent_subdirektorat
-// 	FROM ms_seksi
+// 	FROM tarif
 // 	WHERE id = ?`
 
-// 	data := &model.Subdirektorat{}
+// 	data := &model.Tarif{}
 
 // 	if err := m.DB.QueryRow(query, id).Scan(
 // 		&data.ID,
@@ -140,15 +139,15 @@ func (m *repository) GetOneByID(id int64) ([]*model.Subdirektorat, error) {
 // 	return data, nil
 // }
 
-func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Subdirektorat, int, error) {
+func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tarif, int, error) {
 	var (
-		list = make([]*model.Subdirektorat, 0)
+		list = make([]*model.Tarif, 0)
 	)
 
-	query := `SELECT id, kode_subdirektorat, COALESCE(nama_subdirektorat, '') FROM ms_subdirektorat`
+	query := `SELECT id_tarif, daya, tarifperkwh FROM tarif`
 
 	if dqp.Search != "" {
-		query += ` WHERE MATCH(kode_subdirektorat, nama_subdirektorat) AGAINST(:search IN NATURAL LANGUAGE MODE)`
+		query += ` WHERE MATCH(id_tarif, daya) AGAINST(:search IN NATURAL LANGUAGE MODE)`
 	}
 	query += ` LIMIT :limit OFFSET :offset`
 
@@ -160,13 +159,13 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Subdirektora
 
 	for rows.Next() {
 		var (
-			data model.Subdirektorat
+			data model.Tarif
 		)
 
 		if err := rows.Scan(
 			&data.ID,
-			&data.Kodesubdirektorat,
-			&data.Namasubdirektorat,
+			&data.Daya,
+			&data.Tarif,
 		); err != nil {
 			return nil, -1, err
 		}
@@ -178,7 +177,7 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Subdirektora
 }
 
 func (m *repository) DeleteOneByID(id int64) (int64, error) {
-	query := `DELETE FROM ms_subdirektorat WHERE id = ?`
+	query := `DELETE FROM tarif WHERE id_tarif = ?`
 
 	res, err := m.DB.Exec(query, id)
 	if err != nil {

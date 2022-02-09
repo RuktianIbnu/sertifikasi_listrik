@@ -1,8 +1,8 @@
 package query
 
 import (
-	"epiket-api/pkg/model"
 	"errors"
+	"sertifikasi_listrik/pkg/model"
 	"strconv"
 
 	"github.com/gin-gonic/gin"

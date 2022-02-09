@@ -1,20 +1,20 @@
-package role
+package level
 
 import (
-	"epiket-api/pkg/helper"
-	"epiket-api/pkg/model"
+	"sertifikasi_listrik/pkg/helper"
+	"sertifikasi_listrik/pkg/model"
 
 	"github.com/jmoiron/sqlx"
 )
 
 // Repository ...
 type Repository interface {
-	Create(data *model.Roles) (int64, error)
-	GetOneByID(id int64) ([]*model.Roles, error)
-	// GetAllByID(id int64) (*model.Roles, error)
-	UpdateOneByID(data *model.Roles) (int64, error)
+	Create(data *model.Level) (int64, error)
+	GetOneByID(id int64) ([]*model.Level, error)
+	// GetAllByID(id int64) (*model.Level, error)
+	UpdateOneByID(data *model.Level) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
-	GetAll(dqp *model.DefaultQueryParam) ([]*model.Roles, int, error)
+	GetAll(dqp *model.DefaultQueryParam) ([]*model.Level, int, error)
 	getTotalCount() (totalEntries int)
 }
 
@@ -30,19 +30,19 @@ func NewRepository() Repository {
 }
 
 func (m *repository) getTotalCount() (totalEntries int) {
-	if err := m.DB.QueryRow("SELECT COUNT(*) FROM ms_roles").Scan(&totalEntries); err != nil {
+	if err := m.DB.QueryRow("SELECT COUNT(*) FROM level").Scan(&totalEntries); err != nil {
 		return -1
 	}
 
 	return totalEntries
 }
 
-func (m *repository) Create(data *model.Roles) (int64, error) {
-	query := `INSERT INTO ms_roles(
-		name_role) VALUES(?)`
+func (m *repository) Create(data *model.Level) (int64, error) {
+	query := `INSERT INTO level(
+		nama_level) VALUES(?)`
 
 	res, err := m.DB.Exec(query,
-		&data.Namarole,
+		&data.Nama_level,
 	)
 
 	if err != nil {
@@ -57,12 +57,12 @@ func (m *repository) Create(data *model.Roles) (int64, error) {
 	return lastID, nil
 }
 
-func (m *repository) UpdateOneByID(data *model.Roles) (int64, error) {
-	query := `UPDATE ms_roles set name_role = ?
-	WHERE id = ?`
+func (m *repository) UpdateOneByID(data *model.Level) (int64, error) {
+	query := `UPDATE level set nama_level = ?
+	WHERE id_level = ?`
 
 	res, err := m.DB.Exec(query,
-		&data.Namarole,
+		&data.Nama_level,
 		data.ID,
 	)
 
@@ -78,16 +78,16 @@ func (m *repository) UpdateOneByID(data *model.Roles) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (m *repository) GetOneByID(id int64) ([]*model.Roles, error) {
+func (m *repository) GetOneByID(id int64) ([]*model.Level, error) {
 	var (
-		list_data = make([]*model.Roles, 0)
+		list_data = make([]*model.Level, 0)
 	)
 
 	query := `SELECT 
-	id, 
-	name_role
-	FROM ms_roles  
-	WHERE id = ?`
+	id_level, 
+	nama_level
+	FROM level  
+	WHERE id_level = ?`
 
 	rows, err := m.DB.Query(query, id)
 	if err != nil {
@@ -97,12 +97,12 @@ func (m *repository) GetOneByID(id int64) ([]*model.Roles, error) {
 
 	for rows.Next() {
 		var (
-			data model.Roles
+			data model.Level
 		)
 
 		if err := rows.Scan(
 			&data.ID,
-			&data.Namarole,
+			&data.Nama_level,
 		); err != nil {
 			return nil, err
 		}
@@ -113,16 +113,16 @@ func (m *repository) GetOneByID(id int64) ([]*model.Roles, error) {
 	return list_data, nil
 }
 
-// func (m *repository) GetAllByID(id int64) (*model.Roles, error) {
+// func (m *repository) GetAllByID(id int64) (*model.Level, error) {
 // 	query := `SELECT
 // 	id,
 // 	COALESCE(kode_seksi, ''),
 // 	COALESCE(nama_seksi, ''),
 // 	id_parent_subdirektorat
-// 	FROM ms_roles
+// 	FROM level
 // 	WHERE id = ?`
 
-// 	data := &model.Roles{}
+// 	data := &model.Level{}
 
 // 	if err := m.DB.QueryRow(query, id).Scan(
 // 		&data.ID,
@@ -135,15 +135,15 @@ func (m *repository) GetOneByID(id int64) ([]*model.Roles, error) {
 // 	return data, nil
 // }
 
-func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Roles, int, error) {
+func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Level, int, error) {
 	var (
-		list = make([]*model.Roles, 0)
+		list = make([]*model.Level, 0)
 	)
 
-	query := `SELECT id, COALESCE(name_role, '') FROM ms_roles`
+	query := `SELECT id_level, COALESCE(nama_level, '') FROM level`
 
 	if dqp.Search != "" {
-		query += ` WHERE MATCH(name_role) AGAINST(:search IN NATURAL LANGUAGE MODE)`
+		query += ` WHERE MATCH(nama_level) AGAINST(:search IN NATURAL LANGUAGE MODE)`
 	}
 	query += ` LIMIT :limit OFFSET :offset`
 
@@ -155,12 +155,12 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Roles, int, 
 
 	for rows.Next() {
 		var (
-			data model.Roles
+			data model.Level
 		)
 
 		if err := rows.Scan(
 			&data.ID,
-			&data.Namarole,
+			&data.Nama_level,
 		); err != nil {
 			return nil, -1, err
 		}
@@ -172,7 +172,7 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Roles, int, 
 }
 
 func (m *repository) DeleteOneByID(id int64) (int64, error) {
-	query := `DELETE FROM ms_roles WHERE id = ?`
+	query := `DELETE FROM level WHERE id_level = ?`
 
 	res, err := m.DB.Exec(query, id)
 	if err != nil {

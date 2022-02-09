@@ -1,21 +1,21 @@
 package user
 
 import (
-	"epiket-api/pkg/helper"
-	"epiket-api/pkg/model"
+	"sertifikasi_listrik/pkg/helper"
+	"sertifikasi_listrik/pkg/model"
 
 	"github.com/jmoiron/sqlx"
 )
 
 // Repository ...
 type Repository interface {
-	Register(nip string, nama string, Nohp string, IDsubdirektorat int64, IDseksi int64, Levelpengguna int64, Password string) (int64, error)
-	CheckNIPExist(nip string) (exist bool)
+	//Register(nip string, nama string, Nohp string, IDsubdirektorat int64, IDseksi int64, Levelpengguna int64, Password string) (int64, error)
+	CheckPelangganIsExist(username string) (exist bool)
 	// Create(data *model.User) (int64, error)
-	CheckUserIsActive(email string) (active bool)
+	CheckUserIsActive(username string) (active bool)
 	// UpdateOneByID(data *model.User) (rowsAffected int64, err error)
 	// UpdatePasswordOneByID(ID int64, newpassword string) (rowsAffected int64, err error)
-	GetUserMetadataByNip(nip string) (*model.User, error)
+	GetUserMetadataByIdUser(id_user string) (*model.User, error)
 	// GetOneByID(id int64) (*model.User, error)
 	// GetOneByIDPegawai(id int64) (*model.User, error)
 	// GetAll() ([]*model.User, error)
@@ -36,31 +36,31 @@ func NewRepository() Repository {
 	}
 }
 
-func (m *repository) Register(nip string, nama string, Nohp string, IDsubdirektorat int64, IDseksi int64, Levelpengguna int64, Password string) (int64, error) {
-	tx, err := m.DB.Begin()
-	if err != nil {
-		return -1, err
-	}
+// func (m *repository) Register(nip string, nama string, Nohp string, IDsubdirektorat int64, IDseksi int64, Levelpengguna int64, Password string) (int64, error) {
+// 	tx, err := m.DB.Begin()
+// 	if err != nil {
+// 		return -1, err
+// 	}
 
-	res, err := tx.Exec(`INSERT INTO ms_users(nip, nama, no_hp, id_subdirektorat, id_seksi, level_pengguna, password) VALUES(?, ?, ?,?,? ,?, ?)`, nip, nama, Nohp, IDsubdirektorat, IDseksi, Levelpengguna, Password)
-	if err != nil {
-		tx.Rollback()
-		return -1, err
-	}
-	lastIDUser, _ := res.LastInsertId()
+// 	res, err := tx.Exec(`INSERT INTO ms_users(nip, nama, no_hp, id_subdirektorat, id_seksi, level_pengguna, password) VALUES(?, ?, ?,?,? ,?, ?)`, nip, nama, Nohp, IDsubdirektorat, IDseksi, Levelpengguna, Password)
+// 	if err != nil {
+// 		tx.Rollback()
+// 		return -1, err
+// 	}
+// 	lastIDUser, _ := res.LastInsertId()
 
-	return lastIDUser, tx.Commit()
-}
+// 	return lastIDUser, tx.Commit()
+// }
 
-func (m *repository) CheckNIPExist(nip string) (exist bool) {
+func (m *repository) CheckPelangganIsExist(username string) (exist bool) {
 	query := `SELECT 
-	coalesce(nip, '') 
+	coalesce(username, '') 
 	FROM ms_users 
-	WHERE nip = ?`
+	WHERE username = ?`
 
 	var e string
 
-	if err := m.DB.QueryRow(query, nip).Scan(
+	if err := m.DB.QueryRow(query, username).Scan(
 		&e,
 	); err != nil {
 		return false
@@ -277,32 +277,22 @@ func (m *repository) CheckUserIsActive(nip string) (active bool) {
 	return
 }
 
-func (m *repository) GetUserMetadataByNip(nip string) (*model.User, error) {
+func (m *repository) GetUserMetadataByIdUser(id_user string) (*model.User, error) {
 	query := `SELECT
-	id,
-	nip,
-	nama,
-	no_hp,
-	id_subdirektorat,
-	id_seksi,
-	aktif,
-	level_pengguna,
-	password
-	FROM ms_users 
-	WHERE nip = ?`
+	id_user,
+	username,
+	nama_admin,
+	id_level
+	FROM user 
+	WHERE id_user = ?`
 
 	data := &model.User{}
 
-	if err := m.DB.QueryRow(query, nip).Scan(
+	if err := m.DB.QueryRow(query, id_user).Scan(
 		&data.ID,
-		&data.NIP,
-		&data.Nama,
-		&data.Nohp,
-		&data.IDsubdirektorat,
-		&data.IDseksi,
-		&data.Aktif,
-		&data.Levelpengguna,
-		&data.Password,
+		&data.Username,
+		&data.Nama_admin,
+		&data.IDLevel,
 	); err != nil {
 		return nil, err
 	}

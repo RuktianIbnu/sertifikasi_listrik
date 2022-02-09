@@ -1,10 +1,10 @@
 package login
 
 import (
-	gu "epiket-api/http/usecase/login"
-	resp "epiket-api/pkg/helper/response"
-	"epiket-api/pkg/model"
 	"net/http"
+	gu "sertifikasi_listrik/http/usecase/login"
+	resp "sertifikasi_listrik/pkg/helper/response"
+	"sertifikasi_listrik/pkg/model"
 
 	"github.com/gin-gonic/gin"
 )
