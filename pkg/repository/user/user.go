@@ -17,6 +17,8 @@ type Repository interface {
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.User, int, error)
 	DeleteOneByID(id int64) (int64, error)
 	getTotalCount() (totalEntries int)
+
+	Register(username string, password string, nama_admin string, id_level int64) (int64, error)
 }
 
 type repository struct {
@@ -30,8 +32,24 @@ func NewRepository() Repository {
 	}
 }
 
+func (m *repository) Register(username string, password string, nama_admin string, id_level int64) (int64, error) {
+	tx, err := m.DB.Begin()
+	if err != nil {
+		return -1, err
+	}
+
+	res, err := tx.Exec(`INSERT INTO user(username, password, nama_admin, id_level) VALUES(?, ?, ?, ?)`, username, password, nama_admin, id_level)
+	if err != nil {
+		tx.Rollback()
+		return -1, err
+	}
+	lastIDUser, _ := res.LastInsertId()
+
+	return lastIDUser, tx.Commit()
+}
+
 func (m *repository) getTotalCount() (totalEntries int) {
-	if err := m.DB.QueryRow("SELECT COUNT(*) FROM tarif").Scan(&totalEntries); err != nil {
+	if err := m.DB.QueryRow("SELECT COUNT(*) FROM user").Scan(&totalEntries); err != nil {
 		return -1
 	}
 

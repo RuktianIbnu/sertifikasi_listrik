@@ -12,7 +12,7 @@ import (
 // Usecase ...
 type Usecase interface {
 	Login(nip, password string) (string, *model.User, error)
-	// Register(nip string, nama string, Nohp string, IDsubdirektorat int64, IDseksi int64, Levelpengguna int64, Password string) (int64, error)
+	Register(username, password, nama_admin string, IDLevel int64) (int64, error)
 }
 
 type usecase struct {
@@ -34,23 +34,23 @@ func NewUsecase() Usecase {
 	}
 }
 
-// func (m *usecase) Register(nip string, nama string, Nohp string, IDsubdirektorat int64, IDseksi int64, Levelpengguna int64, Password string) (int64, error) {
-// 	if nipExist := m.userRepo.CheckNIPExist(nip); nipExist {
-// 		return 500, errors.New("nip already registered")
-// 	}
+func (m *usecase) Register(username, password, nama_admin string, IDLevel int64) (int64, error) {
+	if username := m.userRepo.CheckPelangganIsExist(username); username {
+		return 500, errors.New("username already registered")
+	}
 
-// 	hashedPwd, err := bcrypt.Hash(Password)
-// 	if err != nil {
-// 		return 500, errors.New("gagal crypt password")
-// 	}
+	hashedPwd, err := bcrypt.Hash(password)
+	if err != nil {
+		return 500, errors.New("gagal encrypt password")
+	}
 
-// 	lastIDUser, err := m.userRepo.Register(nip, nama, Nohp, IDsubdirektorat, IDseksi, Levelpengguna, hashedPwd)
-// 	if err != nil {
-// 		return 500, errors.New("gagal registrasi")
-// 	}
+	lastIDUser, err := m.userRepo.Register(username, hashedPwd, nama_admin, IDLevel)
+	if err != nil {
+		return 500, errors.New("gagal registrasi")
+	}
 
-// 	return lastIDUser, err
-// }
+	return lastIDUser, err
+}
 
 func (m *usecase) Login(username, password string) (string, *model.User, error) {
 	userMetadata, err := m.userRepo.GetUserMetadataByIdUser(username)
