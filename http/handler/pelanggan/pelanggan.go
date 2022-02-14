@@ -1,12 +1,12 @@
-package role
+package pelanggan
 
 import (
-	ur "epiket-api/http/usecase/role"
-	qry "epiket-api/pkg/helper/query"
-	resp "epiket-api/pkg/helper/response"
-	"epiket-api/pkg/model"
 	"errors"
 	"net/http"
+	uk "sertifikasi_listrik/http/usecase/pelanggan"
+	qry "sertifikasi_listrik/pkg/helper/query"
+	resp "sertifikasi_listrik/pkg/helper/response"
+	"sertifikasi_listrik/pkg/model"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -22,19 +22,19 @@ type Handler interface {
 }
 
 type handler struct {
-	roleRepo ur.Usecase
+	pelangganUc uk.Usecase
 }
 
 // NewHandler ...
 func NewHandler() Handler {
 	return &handler{
-		ur.NewUsecase(),
+		uk.NewUsecase(),
 	}
 }
 
 func (m *handler) Create(c *gin.Context) {
 	var (
-		data model.Roles
+		data model.Pelanggan
 	)
 
 	if err := c.ShouldBindJSON(&data); err != nil {
@@ -42,8 +42,8 @@ func (m *handler) Create(c *gin.Context) {
 		return
 	}
 
-	// lastID, err := m.roleRepo.Create(&data)
-	if err := m.roleRepo.Create(&data); err != nil {
+	// lastID, err := m.pelangganUc.Create(&data)
+	if err := m.pelangganUc.Create(&data); err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
 	}
@@ -53,7 +53,7 @@ func (m *handler) Create(c *gin.Context) {
 
 func (m *handler) UpdateOneByID(c *gin.Context) {
 	var (
-		data   model.Roles
+		data   model.Pelanggan
 		ids, _ = strconv.ParseInt(c.Param("id"), 10, 64)
 	)
 
@@ -69,7 +69,7 @@ func (m *handler) UpdateOneByID(c *gin.Context) {
 
 	data.ID = ids
 
-	_, err := m.roleRepo.UpdateOneByID(&data)
+	_, err := m.pelangganUc.UpdateOneByID(&data)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
@@ -88,7 +88,7 @@ func (m *handler) GetOneByID(c *gin.Context) {
 		return
 	}
 
-	data, err := m.roleRepo.GetOneByID(ids)
+	data, err := m.pelangganUc.GetOneByID(ids)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
@@ -110,7 +110,7 @@ func (m *handler) GetAll(c *gin.Context) {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
 	}
-	list, totalEntries, err := m.roleRepo.GetAll(dqp)
+	list, totalEntries, err := m.pelangganUc.GetAll(dqp)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
@@ -129,7 +129,7 @@ func (m *handler) DeleteOneByID(c *gin.Context) {
 		return
 	}
 
-	_, err := m.roleRepo.DeleteOneByID(ids)
+	_, err := m.pelangganUc.DeleteOneByID(ids)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return

@@ -8,7 +8,7 @@ import (
 
 // Usecase ...
 type Usecase interface {
-	Create(data *model.Tagihan) error
+	Create(data *model.Tagihan) (int64, error)
 	GetOneByID(id int64) ([]*model.Tagihan, error)
 	UpdateOneByID(data *model.Tagihan) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
@@ -26,14 +26,8 @@ func NewUsecase() Usecase {
 	}
 }
 
-func (m *usecase) Create(data *model.Tagihan) error {
-	lastID, err := m.tagihanRepo.Create(data)
-	if err != nil {
-		return err
-	}
-	data.ID = lastID
-
-	return nil
+func (m *usecase) Create(data *model.Tagihan) (int64, error) {
+	return m.tagihanRepo.Create(data)
 }
 
 func (m *usecase) UpdateOneByID(data *model.Tagihan) (int64, error) {

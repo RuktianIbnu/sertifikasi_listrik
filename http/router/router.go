@@ -4,27 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 
 	// dh "epiket-api/internal/http/handler/dashboard"
-	gh "epiket-api/http/handler/global"
-	kh "epiket-api/http/handler/kegiatan"
-	rh "epiket-api/http/handler/role"
-	seh "epiket-api/http/handler/seksi"
-	suh "epiket-api/http/handler/subdirektorat"
-
-	// ph "epiket-api/internal/http/handler/pegawai"
-	// pkh "epiket-api/internal/http/handler/poinkuesioner"
-	// pkih "epiket-api/internal/http/handler/poinkuesioneritem"
-	// rpt "epiket-api/internal/http/handler/report"
-	// rh "epiket-api/internal/http/handler/respondent"
-	// ssh "epiket-api/internal/http/handler/struktursurvey"
-	// sh "epiket-api/internal/http/handler/survey"
-	// sah "epiket-api/internal/http/handler/surveyassignment"
-	// saih "epiket-api/internal/http/handler/surveyassignmentinstansi"
-	// sapih "epiket-api/internal/http/handler/surveyassignmentpegawaiinstansi"
-	// sih "epiket-api/internal/http/handler/surveyitem"
-	// tph "epiket-api/internal/http/handler/tipepoin"
-	// uh "epiket-api/internal/http/handler/user"
-	"epiket-api/http/middleware/auth"
-	"epiket-api/http/middleware/cors"
+	gh "sertifikasi_listrik/http/handler/global"
+	level_h "sertifikasi_listrik/http/handler/level"
+	pelanggan_h "sertifikasi_listrik/http/handler/pelanggan"
+	pembayaran_h "sertifikasi_listrik/http/handler/pembayaran"
+	penggunaan_h "sertifikasi_listrik/http/handler/penggunaan"
+	tagihan_h "sertifikasi_listrik/http/handler/tagihan"
+	tarif_h "sertifikasi_listrik/http/handler/tarif"
+	user_h "sertifikasi_listrik/http/handler/user"
+	"sertifikasi_listrik/http/middleware/auth"
+	"sertifikasi_listrik/http/middleware/cors"
 )
 
 // Routes ...
@@ -42,30 +31,18 @@ func Routes() *gin.Engine {
 	r.MaxMultipartMemory = 8 << 20 // 8 MiB
 
 	globalHandler := gh.NewHandler()
-	seksiHandler := seh.NewHandler()
-	subdirektoratHandler := suh.NewHandler()
-	kegiatanHandler := kh.NewHandler()
-	roleHandler := rh.NewHandler()
-	// poinKuesionerHandler := pkh.NewHandler()
-	// poinKuesionerItemHandler := pkih.NewHandler()
-	// kuesionerHandler := kh.NewHandler()
-	// instansiHandler := ih.NewHandler()
-	// userHandler := uh.NewHandler()
-	// surveyHandler := sh.NewHandler()
-	// surveyItemHandler := sih.NewHandler()
-	// surveyAssignmentHandler := sah.NewHandler()
-	// surveyAssignmentPegawaiInstansiHandler := sapih.NewHandler()
-	// surveyAssignmentInstansiHandler := saih.NewHandler()
-	// dashboardHandler := dh.NewHandler()
-	// respondentHandler := rh.NewHandler()
-	// strukturSurveyHandler := ssh.NewHandler()
-	//repot
-	// reportHandler := rpt.NewHandler()
+	levelHendler := level_h.NewHandler()
+	pelangganHendler := pelanggan_h.NewHandler()
+	pembayaranHandler := pembayaran_h.NewHandler()
+	penggunaanHandler := penggunaan_h.NewHandler()
+	tagihanHandler := tagihan_h.NewHandler()
+	tarifHandler := tarif_h.NewHandler()
+	userHandler := user_h.NewHandler()
 
 	v1 := r.Group("/v1")
 	{
 		v1.POST("/login", globalHandler.Login)
-		v1.POST("/register", globalHandler.Register)
+		// v1.POST("/register", globalHandler.Register)
 		// v1.GET("/test-file", func(c *gin.Context) {
 		// 	log.Println("oke")
 		// 	c.FileAttachment(fmt.Sprintf("%s/report.pdf", os.Getenv("EXP_PDF_PATH")), "report.pdf")
@@ -75,37 +52,49 @@ func Routes() *gin.Engine {
 		{
 			// ----------------------------------PASSED CHECK!!!
 
-			resources.POST("/seksi", seksiHandler.Create)
-			resources.GET("/seksi/:id", seksiHandler.GetOneByID)
-			resources.PUT("/seksi/:id", seksiHandler.UpdateOneByID)
-			resources.DELETE("/seksi/:id", seksiHandler.DeleteOneByID)
-			resources.GET("/seksi", seksiHandler.GetAll)
+			resources.POST("/seksi", levelHendler.Create)
+			resources.GET("/seksi/:id", levelHendler.GetOneByID)
+			resources.PUT("/seksi/:id", levelHendler.UpdateOneByID)
+			resources.DELETE("/seksi/:id", levelHendler.DeleteOneByID)
+			resources.GET("/seksi", levelHendler.GetAll)
 
 			// --------------------------------------------------
 
-			resources.POST("/subdirektorat", subdirektoratHandler.Create)
-			resources.GET("/subdirektorat/:id", subdirektoratHandler.GetOneByID)
-			resources.PUT("/subdirektorat/:id", subdirektoratHandler.UpdateOneByID)
-			resources.DELETE("/subdirektorat/:id", subdirektoratHandler.DeleteOneByID)
-			resources.GET("/subdirektorat", subdirektoratHandler.GetAll)
+			resources.POST("/subdirektorat", pelangganHendler.Create)
+			resources.GET("/subdirektorat/:id", pelangganHendler.GetOneByID)
+			resources.PUT("/subdirektorat/:id", pelangganHendler.UpdateOneByID)
+			resources.DELETE("/subdirektorat/:id", pelangganHendler.DeleteOneByID)
+			resources.GET("/subdirektorat", pelangganHendler.GetAll)
 
-			resources.POST("/kegiatan", kegiatanHandler.Create)
-			resources.GET("/kegiatan/:id", kegiatanHandler.GetOneByID)
-			resources.PUT("/kegiatan/:id", kegiatanHandler.UpdateOneByID)
-			resources.DELETE("/kegiatan/:id", kegiatanHandler.DeleteOneByID)
-			resources.GET("/kegiatan", kegiatanHandler.GetAll)
+			resources.POST("/kegiatan", pembayaranHandler.Create)
+			resources.GET("/kegiatan/:id", pembayaranHandler.GetOneByID)
+			resources.PUT("/kegiatan/:id", pembayaranHandler.UpdateOneByID)
+			resources.DELETE("/kegiatan/:id", pembayaranHandler.DeleteOneByID)
+			resources.GET("/kegiatan", pembayaranHandler.GetAll)
 
-			resources.POST("/role", roleHandler.Create)
-			resources.GET("/role/:id", roleHandler.GetOneByID)
-			resources.PUT("/role/:id", roleHandler.UpdateOneByID)
-			resources.DELETE("/role/:id", roleHandler.DeleteOneByID)
-			resources.GET("/role", roleHandler.GetAll)
+			resources.POST("/role", penggunaanHandler.Create)
+			resources.GET("/role/:id", penggunaanHandler.GetOneByID)
+			resources.PUT("/role/:id", penggunaanHandler.UpdateOneByID)
+			resources.DELETE("/role/:id", penggunaanHandler.DeleteOneByID)
+			resources.GET("/role", penggunaanHandler.GetAll)
 
-			// 	resources.POST("/jabatan", jabatanHandler.Create)
-			// 	resources.GET("/jabatan/:id", jabatanHandler.GetOneByID)
-			// 	resources.PUT("/jabatan/:id", jabatanHandler.UpdateOneByID)
-			// 	resources.DELETE("/jabatan/:id", jabatanHandler.DeleteOneByID)
-			// 	resources.GET("/jabatan", jabatanHandler.GetAll)
+			resources.POST("/role", tagihanHandler.Create)
+			resources.GET("/role/:id", tagihanHandler.GetOneByID)
+			resources.PUT("/role/:id", tagihanHandler.UpdateOneByID)
+			resources.DELETE("/role/:id", tagihanHandler.DeleteOneByID)
+			resources.GET("/role", tagihanHandler.GetAll)
+
+			resources.POST("/role", tarifHandler.Create)
+			resources.GET("/role/:id", tarifHandler.GetOneByID)
+			resources.PUT("/role/:id", tarifHandler.UpdateOneByID)
+			resources.DELETE("/role/:id", tarifHandler.DeleteOneByID)
+			resources.GET("/role", tarifHandler.GetAll)
+
+			resources.POST("/jabatan", userHandler.Create)
+			resources.GET("/jabatan/:id", userHandler.GetOneByID)
+			resources.PUT("/jabatan/:id", userHandler.UpdateOneByID)
+			resources.DELETE("/jabatan/:id", userHandler.DeleteOneByID)
+			resources.GET("/jabatan", userHandler.GetAll)
 
 			// 	resources.POST("/user", userHandler.Create)
 			// 	resources.POST("/user/:id", userHandler.ResetPasswordByID)

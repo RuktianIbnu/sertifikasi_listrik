@@ -1,12 +1,12 @@
-package seksi
+package tagihan
 
 import (
-	us "epiket-api/http/usecase/seksi"
-	qry "epiket-api/pkg/helper/query"
-	resp "epiket-api/pkg/helper/response"
-	"epiket-api/pkg/model"
 	"errors"
 	"net/http"
+	us "sertifikasi_listrik/http/usecase/tagihan"
+	qry "sertifikasi_listrik/pkg/helper/query"
+	resp "sertifikasi_listrik/pkg/helper/response"
+	"sertifikasi_listrik/pkg/model"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +22,7 @@ type Handler interface {
 }
 
 type handler struct {
-	seksiUsecase us.Usecase
+	tagihanUc us.Usecase
 }
 
 // NewHandler ...
@@ -34,7 +34,7 @@ func NewHandler() Handler {
 
 func (m *handler) Create(c *gin.Context) {
 	var (
-		data model.Seksi
+		data model.Tagihan
 	)
 
 	if err := c.ShouldBindJSON(&data); err != nil {
@@ -42,7 +42,7 @@ func (m *handler) Create(c *gin.Context) {
 		return
 	}
 
-	lastID, err := m.seksiUsecase.Create(&data)
+	lastID, err := m.tagihanUc.Create(&data)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
@@ -55,7 +55,7 @@ func (m *handler) Create(c *gin.Context) {
 
 func (m *handler) UpdateOneByID(c *gin.Context) {
 	var (
-		data   model.Seksi
+		data   model.Tagihan
 		ids, _ = strconv.ParseInt(c.Param("id"), 10, 64)
 	)
 
@@ -71,7 +71,7 @@ func (m *handler) UpdateOneByID(c *gin.Context) {
 
 	data.ID = ids
 
-	_, err := m.seksiUsecase.UpdateOneByID(&data)
+	_, err := m.tagihanUc.UpdateOneByID(&data)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
@@ -90,7 +90,7 @@ func (m *handler) GetOneByID(c *gin.Context) {
 		return
 	}
 
-	data, err := m.seksiUsecase.GetOneByID(ids)
+	data, err := m.tagihanUc.GetOneByID(ids)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
@@ -112,7 +112,7 @@ func (m *handler) GetAll(c *gin.Context) {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
 	}
-	list, totalEntries, err := m.seksiUsecase.GetAll(dqp)
+	list, totalEntries, err := m.tagihanUc.GetAll(dqp)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
@@ -131,7 +131,7 @@ func (m *handler) DeleteOneByID(c *gin.Context) {
 		return
 	}
 
-	_, err := m.seksiUsecase.DeleteOneByID(ids)
+	_, err := m.tagihanUc.DeleteOneByID(ids)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
