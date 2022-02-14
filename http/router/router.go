@@ -42,7 +42,7 @@ func Routes() *gin.Engine {
 	v1 := r.Group("/v1")
 	{
 		v1.POST("/login", globalHandler.Login)
-		// v1.POST("/register", globalHandler.Register)
+		v1.POST("/register", globalHandler.Register)
 		// v1.GET("/test-file", func(c *gin.Context) {
 		// 	log.Println("oke")
 		// 	c.FileAttachment(fmt.Sprintf("%s/report.pdf", os.Getenv("EXP_PDF_PATH")), "report.pdf")
