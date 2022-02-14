@@ -55,7 +55,7 @@ func NewUsecase() Usecase {
 func (m *usecase) Login(username, password string) (string, *model.User, error) {
 	userMetadata, err := m.userRepo.GetUserMetadataByIdUser(username)
 	if err != nil {
-		return "", nil, errors.New("nip not registered")
+		return "", nil, errors.New("Username not registered")
 	}
 
 	if !bcrypt.Compare(password, userMetadata.Password) {
