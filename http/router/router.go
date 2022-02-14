@@ -28,7 +28,7 @@ func Routes() *gin.Engine {
 		})
 	})
 
-	r.MaxMultipartMemory = 8 << 20 // 8 MiB
+	// r.MaxMultipartMemory = 8 << 20 // 8 MiB
 
 	globalHandler := gh.NewHandler()
 	levelHendler := level_h.NewHandler()

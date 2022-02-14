@@ -11,7 +11,7 @@ import (
 
 // Usecase ...
 type Usecase interface {
-	Login(nip, password string) (string, *model.User, error)
+	Login(username, password string) (string, *model.User, error)
 	Register(username, password, nama_admin string, IDLevel int64) (int64, error)
 }
 
@@ -46,7 +46,7 @@ func (m *usecase) Register(username, password, nama_admin string, IDLevel int64)
 
 	lastIDUser, err := m.userRepo.Register(username, hashedPwd, nama_admin, IDLevel)
 	if err != nil {
-		return 500, errors.New("gagal registrasi")
+		return 500, err
 	}
 
 	return lastIDUser, err
@@ -57,9 +57,10 @@ func (m *usecase) Login(username, password string) (string, *model.User, error) 
 	if err != nil {
 		return "", nil, errors.New("Username not registered")
 	}
-
+	fmt.Println(password)
+	fmt.Println(userMetadata.Password)
 	if !bcrypt.Compare(password, userMetadata.Password) {
-		return "", nil, errors.New("incorrect nip or password")
+		return "", nil, errors.New("password salah")
 	}
 
 	token, err := jwt.CreateToken(userMetadata.ID, userMetadata.Username, userMetadata.Nama_admin, userMetadata.IDLevel)
@@ -68,7 +69,7 @@ func (m *usecase) Login(username, password string) (string, *model.User, error) 
 	}
 
 	//set empty password
-	userMetadata.Password = ""
+	// userMetadata.Password = ""
 
 	return token, userMetadata, nil
 }

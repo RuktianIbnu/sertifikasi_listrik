@@ -28,15 +28,8 @@ func NewHandler() Handler {
 }
 
 func (m *handler) Register(c *gin.Context) {
-	type register struct {
-		Username   string `json:"username"`
-		Password   string `json:"password" binding:"required"`
-		Nama_admin string `json:"nama_admin" binding:"required"`
-		Id_level   int64  `json:"id_level" binding:"required"`
-	}
-
 	var (
-		registerData register
+		registerData model.User
 	)
 
 	if err := c.ShouldBindJSON(&registerData); err != nil {
@@ -46,7 +39,7 @@ func (m *handler) Register(c *gin.Context) {
 
 	dataResult := &model.User{}
 
-	lastID, err := m.globalUsecase.Register(registerData.Username, registerData.Password, registerData.Nama_admin, registerData.Id_level)
+	lastID, err := m.globalUsecase.Register(registerData.Username, registerData.Password, registerData.Nama_admin, registerData.IDLevel)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
@@ -57,13 +50,13 @@ func (m *handler) Register(c *gin.Context) {
 }
 
 func (m *handler) Login(c *gin.Context) {
-	type login struct {
-		Nip      string `json:"username" binding:"required"`
+	type Login struct {
+		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required,min=8"`
 	}
 
 	var (
-		loginData login
+		loginData Login
 	)
 
 	if err := c.ShouldBindJSON(&loginData); err != nil {
@@ -71,7 +64,7 @@ func (m *handler) Login(c *gin.Context) {
 		return
 	}
 
-	token, userMetadata, err := m.globalUsecase.Login(loginData.Nip, loginData.Password)
+	token, userMetadata, err := m.globalUsecase.Login(loginData.Username, loginData.Password)
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return

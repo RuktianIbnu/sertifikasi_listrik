@@ -1,6 +1,8 @@
 package bcrypt
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"golang.org/x/crypto/bcrypt"
+)
 
 // Hash ...
 func Hash(str string) (string, error) {
@@ -11,5 +13,6 @@ func Hash(str string) (string, error) {
 // Compare ...
 func Compare(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	// fmt.Println(err.Error())
 	return err == nil
 }

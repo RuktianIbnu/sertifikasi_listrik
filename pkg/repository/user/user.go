@@ -81,8 +81,8 @@ func (m *repository) Create(data *model.User) (int64, error) {
 
 func (m *repository) CheckPelangganIsExist(username string) (exist bool) {
 	query := `SELECT 
-	coalesce(username, '') 
-	FROM ms_users 
+	username
+	FROM user 
 	WHERE username = ?`
 
 	var e string
@@ -217,6 +217,7 @@ func (m *repository) GetUserMetadataByIdUser(username string) (*model.User, erro
 	query := `SELECT
 	id_user,
 	username,
+	password,
 	nama_admin,
 	id_level
 	FROM user 
@@ -227,6 +228,7 @@ func (m *repository) GetUserMetadataByIdUser(username string) (*model.User, erro
 	if err := m.DB.QueryRow(query, username).Scan(
 		&data.ID,
 		&data.Username,
+		&data.Password,
 		&data.Nama_admin,
 		&data.IDLevel,
 	); err != nil {
