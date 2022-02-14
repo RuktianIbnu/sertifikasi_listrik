@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -37,12 +38,13 @@ func Middleware() gin.HandlerFunc {
 			return
 		}
 
+		fmt.Println(metadata)
 		// token valid and forward to original request
 
-		c.Set("id_user", metadata.Id_user)
-		c.Set("username", metadata.Username)
-		c.Set("nama_admin", metadata.Nama_admin)
-		c.Set("id_level", metadata.Id_level)
+		// c.Set("id_user", metadata.Id_user)
+		// c.Set("username", metadata.Username)
+		// c.Set("nama_admin", metadata.Nama_admin)
+		// c.Set("id_level", metadata.Id_level)
 
 		c.Next()
 

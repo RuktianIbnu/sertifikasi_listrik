@@ -13,7 +13,6 @@ import (
 type TokenMetadata struct {
 	Id_user    int64
 	Username   string
-	Password   string
 	Nama_admin string
 	Id_level   int64
 }
@@ -55,7 +54,9 @@ func TokenValid(headerToken string) error {
 	if err != nil {
 		return err
 	}
+
 	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
+		fmt.Println(err.Error())
 		return err
 	}
 	return nil
@@ -70,8 +71,9 @@ func ExtractTokenMetadata(headerToken string) (*TokenMetadata, error) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
-		idUser, err := strconv.ParseInt(fmt.Sprintf("%.f", claims["id_user"]), 10, 64)
+		id_user, err := strconv.ParseInt(fmt.Sprintf("%.f", claims["id_user"]), 10, 64)
 		if err != nil {
+			// fmt.Println(err.Error())
 			return nil, err
 		}
 
@@ -91,7 +93,7 @@ func ExtractTokenMetadata(headerToken string) (*TokenMetadata, error) {
 		}
 
 		return &TokenMetadata{
-			Id_user:    idUser,
+			Id_user:    id_user,
 			Username:   username,
 			Nama_admin: nama_admin,
 			Id_level:   id_level,

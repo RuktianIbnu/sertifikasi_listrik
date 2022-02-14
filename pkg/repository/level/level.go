@@ -140,7 +140,7 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Level, int, 
 		list = make([]*model.Level, 0)
 	)
 
-	query := `SELECT nama_level FROM level`
+	query := `SELECT id_level , nama_level FROM level`
 
 	if dqp.Search != "" {
 		query += ` WHERE MATCH(nama_level) AGAINST(:search IN NATURAL LANGUAGE MODE)`
