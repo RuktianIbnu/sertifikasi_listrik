@@ -101,12 +101,11 @@ func (m *repository) CheckPelangganIsExist(username string) (exist bool) {
 }
 
 func (m *repository) UpdateOneByID(data *model.User) (int64, error) {
-	query := `UPDATE user set  username=?, password=?, nama_admin=?, id_level=?
+	query := `UPDATE user set  username=?, nama_admin=?, id_level=?
 	WHERE id_pegawai = ?`
 
 	res, err := m.DB.Exec(query,
 		&data.Username,
-		&data.Password,
 		&data.Nama_admin,
 		&data.IDLevel,
 	)
