@@ -101,13 +101,14 @@ func (m *repository) CheckPelangganIsExist(username string) (exist bool) {
 }
 
 func (m *repository) UpdateOneByID(data *model.User) (int64, error) {
-	query := `UPDATE user set  username=?, nama_admin=?, id_level=?
-	WHERE id_pegawai = ?`
+	query := `UPDATE user set username=?, nama_admin=?, id_level=?
+	WHERE id_user = ?`
 
 	res, err := m.DB.Exec(query,
 		&data.Username,
 		&data.Nama_admin,
 		&data.IDLevel,
+		&data.ID,
 	)
 
 	if err != nil {
@@ -123,7 +124,7 @@ func (m *repository) UpdateOneByID(data *model.User) (int64, error) {
 }
 
 func (m *repository) DeleteOneByID(id int64) (int64, error) {
-	query := `DELETE FROM tarif WHERE id_user = ?`
+	query := `DELETE FROM user WHERE id_user = ?`
 
 	res, err := m.DB.Exec(query, id)
 	if err != nil {
