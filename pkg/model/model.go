@@ -57,7 +57,7 @@ type Pelanggan struct {
 	Nomor_kwh      int64   `json:"nomor_kwh"`
 	Nama_pelanggan string  `json:"nama_pelanggan"`
 	Alamat         string  `json:"alamat"`
-	Tarif          float64 `json:"tarif"`
+	Tarif          float64 `json:"id_tarif"`
 }
 
 // Pembayaran ...

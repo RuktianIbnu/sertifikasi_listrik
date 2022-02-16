@@ -39,7 +39,7 @@ func (m *repository) getTotalCount() (totalEntries int) {
 
 func (m *repository) Create(data *model.Pelanggan) (int64, error) {
 	query := `INSERT INTO pelanggan(
-		username, password, nomor_kwh, nama_pelanggan, alamat, tarif
+		username, password, nomor_kwh, nama_pelanggan, alamat, id_tarif
 	) VALUES(?, ?, ?, ?, ?)`
 
 	res, err := m.DB.Exec(query,
@@ -65,7 +65,7 @@ func (m *repository) Create(data *model.Pelanggan) (int64, error) {
 
 func (m *repository) UpdateOneByID(data *model.Pelanggan) (int64, error) {
 	query := `UPDATE pelanggan set
-	username = ?, password = ?, nomor_kwh = ?, nama_pelanggan = ?, alamat = ?, tarif = ?
+	username = ?, password = ?, nomor_kwh = ?, nama_pelanggan = ?, alamat = ?, id_tarif = ?
 	WHERE id_pelanggan = ?`
 
 	res, err := m.DB.Exec(query,
@@ -98,7 +98,7 @@ func (m *repository) GetAllByID(id int64) (*model.Pelanggan, error) {
 	nomor_kwh, 
 	nama_pelanggan, 
 	alamat, 
-	tarif
+	id_tarif
 	FROM pelanggan  
 	WHERE id_pelanggan = ?`
 
@@ -131,7 +131,7 @@ func (m *repository) GetOneByID(id int64) ([]*model.Pelanggan, error) {
 	nomor_kwh, 
 	nama_pelanggan, 
 	alamat, 
-	tarif
+	id_tarif
 	FROM pelanggan  
 	WHERE id_pelanggan = ?`
 
@@ -176,7 +176,7 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Pelanggan, i
 	nomor_kwh, 
 	nama_pelanggan, 
 	alamat, 
-	tarif
+	id_tarif
 	FROM pelanggan`
 
 	if dqp.Search != "" {
