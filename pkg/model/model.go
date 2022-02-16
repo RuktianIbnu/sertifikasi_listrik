@@ -34,7 +34,7 @@ type Tagihan struct {
 	Id_penggunaan int64  `json:"id_penggunaan"`
 	Id_pelanggan  int64  `json:"id_pelanggan"`
 	Bulan         string `json:"bulan"`
-	Tahun         string `json:"tahun"`
+	Tahun         int64  `json:"tahun"`
 	Jumlah_meter  int64  `json:"jumlah_meter"`
 	Status        string `json:"status"`
 }
