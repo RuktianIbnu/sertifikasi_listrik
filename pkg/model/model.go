@@ -51,7 +51,7 @@ type Penggunaan struct {
 
 // Pelanggan ...
 type Pelanggan struct {
-	ID             int64   `json:"id_pelanggna"`
+	ID             int64   `json:"id_pelanggan"`
 	Username       string  `json:"username"`
 	Password       string  `json:"password"`
 	Nomor_kwh      int64   `json:"nomor_kwh"`
