@@ -163,7 +163,6 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int
 
 	query := `SELECT 
 	id_tagihan,
-	id_tagihan, 
 	id_penggunaan,
 	id_pelanggan,
 	bulan,
