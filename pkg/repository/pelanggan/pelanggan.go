@@ -40,7 +40,7 @@ func (m *repository) getTotalCount() (totalEntries int) {
 func (m *repository) Create(data *model.Pelanggan) (int64, error) {
 	query := `INSERT INTO pelanggan(
 		username, password, nomor_kwh, nama_pelanggan, alamat, id_tarif
-	) VALUES(?, ?, ?, ?, ?)`
+	) VALUES(?, ?, ?, ?, ?, ?)`
 
 	res, err := m.DB.Exec(query,
 		&data.Username,
