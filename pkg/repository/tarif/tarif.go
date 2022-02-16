@@ -39,7 +39,7 @@ func (m *repository) getTotalCount() (totalEntries int) {
 
 func (m *repository) Create(data *model.Tarif) (int64, error) {
 	query := `INSERT INTO tarif(
-		daya, tarifperkwh) VALUES(?)`
+		daya, tarifperkwh) VALUES(?, ?)`
 
 	res, err := m.DB.Exec(query,
 		&data.Daya,
@@ -59,8 +59,8 @@ func (m *repository) Create(data *model.Tarif) (int64, error) {
 }
 
 func (m *repository) UpdateOneByID(data *model.Tarif) (int64, error) {
-	query := `UPDATE tarif set daya = ?, tarifperkwh = ?
-	WHERE id_tarif = ?`
+	query := `UPDATE tarif set daya=?, tarifperkwh=?
+	WHERE id_tarif=?`
 
 	res, err := m.DB.Exec(query,
 		data.Daya,

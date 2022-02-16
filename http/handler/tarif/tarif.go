@@ -70,8 +70,8 @@ func (m *handler) UpdateOneByID(c *gin.Context) {
 	}
 
 	data.ID = ids
-
 	_, err := m.tarifUc.UpdateOneByID(&data)
+
 	if err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
