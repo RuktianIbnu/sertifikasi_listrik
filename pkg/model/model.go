@@ -44,7 +44,7 @@ type Penggunaan struct {
 	ID           int64  `json:"id_penggunaan"`
 	Id_pelanggan int64  `json:"id_pelanggan"`
 	Bulan        string `json:"bulan"`
-	Tahun        string `json:"tahun"`
+	Tahun        int64  `json:"tahun"`
 	Meter_awal   int64  `json:"meter_awal"`
 	Meter_akhir  int64  `json:"meter_akhir"`
 }
