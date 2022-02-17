@@ -10,8 +10,8 @@ import (
 // Repository ...
 type Repository interface {
 	Create(data *model.Pelanggan) (int64, error)
-	GetOneByID(id int64) ([]*model.Pelanggan, error)
-	GetAllByID(id int64) (*model.Pelanggan, error)
+	GetOneByID(id int64) (*model.Pelanggan, error)
+	GetAllByID(id int64) ([]*model.Pelanggan, error)
 	UpdateOneByID(data *model.Pelanggan) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Pelanggan, int, error)
@@ -48,7 +48,7 @@ func (m *repository) Create(data *model.Pelanggan) (int64, error) {
 		&data.Nomor_kwh,
 		&data.Nama_pelanggan,
 		&data.Alamat,
-		&data.Tarif,
+		&data.IDTarif,
 	)
 
 	if err != nil {
@@ -74,7 +74,7 @@ func (m *repository) UpdateOneByID(data *model.Pelanggan) (int64, error) {
 		data.Nomor_kwh,
 		data.Nama_pelanggan,
 		data.Alamat,
-		data.Tarif,
+		data.IDTarif,
 		data.ID,
 	)
 
@@ -90,7 +90,7 @@ func (m *repository) UpdateOneByID(data *model.Pelanggan) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (m *repository) GetAllByID(id int64) (*model.Pelanggan, error) {
+func (m *repository) GetOneByID(id int64) (*model.Pelanggan, error) {
 	query := `SELECT 
 	id_pelanggan, 
 	username, 
@@ -111,7 +111,7 @@ func (m *repository) GetAllByID(id int64) (*model.Pelanggan, error) {
 		&data.Nomor_kwh,
 		&data.Nama_pelanggan,
 		&data.Alamat,
-		&data.Tarif,
+		&data.IDTarif,
 	); err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (m *repository) GetAllByID(id int64) (*model.Pelanggan, error) {
 	return data, nil
 }
 
-func (m *repository) GetOneByID(id int64) ([]*model.Pelanggan, error) {
+func (m *repository) GetAllByID(id int64) ([]*model.Pelanggan, error) {
 	var (
 		list_data = make([]*model.Pelanggan, 0)
 	)
@@ -132,7 +132,7 @@ func (m *repository) GetOneByID(id int64) ([]*model.Pelanggan, error) {
 	nama_pelanggan, 
 	alamat, 
 	id_tarif
-	FROM pelanggan  
+	FROM pelanggan 
 	WHERE id_pelanggan = ?`
 
 	rows, err := m.DB.Query(query, id)
@@ -153,7 +153,7 @@ func (m *repository) GetOneByID(id int64) ([]*model.Pelanggan, error) {
 			&data.Nomor_kwh,
 			&data.Nama_pelanggan,
 			&data.Alamat,
-			&data.Tarif,
+			&data.IDTarif,
 		); err != nil {
 			return nil, err
 		}
@@ -170,14 +170,17 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Pelanggan, i
 	)
 
 	query := `SELECT 
-	id_pelanggan, 
-	username, 
-	password, 
-	nomor_kwh, 
-	nama_pelanggan, 
-	alamat, 
-	id_tarif
-	FROM pelanggan`
+	a.id_pelanggan, 
+	a.username, 
+	a.password, 
+	a.nomor_kwh, 
+	a.nama_pelanggan, 
+	a.alamat, 
+	a.id_tarif,
+	b.daya,
+	b.tarifperkwh
+	FROM pelanggan as a
+	LEFT JOIN tarif as b on b.id_tarif = a.id_tarif`
 
 	if dqp.Search != "" {
 		query += ` WHERE MATCH(username, nomor_kwh) AGAINST(:search IN NATURAL LANGUAGE MODE)`
@@ -192,7 +195,8 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Pelanggan, i
 
 	for rows.Next() {
 		var (
-			data model.Pelanggan
+			data      model.Pelanggan
+			dataTarif model.Tarif
 		)
 
 		if err := rows.Scan(
@@ -202,9 +206,17 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Pelanggan, i
 			&data.Nomor_kwh,
 			&data.Nama_pelanggan,
 			&data.Alamat,
-			&data.Tarif,
+			&data.IDTarif,
+			&dataTarif.Daya,
+			&dataTarif.Tarif,
 		); err != nil {
 			return nil, -1, err
+		}
+
+		data.TarifDetail = &model.Tarif{
+			ID:    data.ID,
+			Daya:  dataTarif.Daya,
+			Tarif: dataTarif.Tarif,
 		}
 
 		list = append(list, &data)

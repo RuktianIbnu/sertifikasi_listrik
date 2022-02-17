@@ -9,7 +9,7 @@ import (
 // Usecase ...
 type Usecase interface {
 	Create(data *model.Pelanggan) error
-	GetOneByID(id int64) ([]*model.Pelanggan, error)
+	GetOneByID(id int64) (*model.Pelanggan, error)
 	UpdateOneByID(data *model.Pelanggan) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Pelanggan, int, error)
@@ -47,7 +47,7 @@ func (m *usecase) UpdateOneByID(data *model.Pelanggan) (int64, error) {
 	return rowsAffected, err
 }
 
-func (m *usecase) GetOneByID(id int64) ([]*model.Pelanggan, error) {
+func (m *usecase) GetOneByID(id int64) (*model.Pelanggan, error) {
 	return m.pelangganRepo.GetOneByID(id)
 }
 

@@ -10,8 +10,8 @@ import (
 // Repository ...
 type Repository interface {
 	Create(data *model.Penggunaan) (int64, error)
-	GetOneByID(id int64) ([]*model.Penggunaan, error)
-	GetAllByID(id int64) (*model.Penggunaan, error)
+	GetOneByID(id int64) (*model.Penggunaan, error)
+	GetAllByID(id int64) ([]*model.Penggunaan, error)
 	UpdateOneByID(data *model.Penggunaan) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Penggunaan, int, error)
@@ -39,11 +39,11 @@ func (m *repository) getTotalCount() (totalEntries int) {
 
 func (m *repository) Create(data *model.Penggunaan) (int64, error) {
 	query := `INSERT INTO penggunaan(
-		id_pelanggan, bulan, tahun, meter_awal, meter_akhir
+		id_pelanggan, bulan, tahun, meter_awal, meter_akhir, status
 	) VALUES(?, ?, ?, ?, ?)`
 
 	res, err := m.DB.Exec(query,
-		&data.Id_pelanggan,
+		&data.IDPelanggan,
 		&data.Bulan,
 		&data.Tahun,
 		&data.Meter_awal,
@@ -64,11 +64,11 @@ func (m *repository) Create(data *model.Penggunaan) (int64, error) {
 
 func (m *repository) UpdateOneByID(data *model.Penggunaan) (int64, error) {
 	query := `UPDATE penggunaan set
-	id_pelanggan = ?, bulan = ?, tahun = ?, meter_awal = ?, meter_akhir = ?
+	id_pelanggan = ?, bulan = ?, tahun = ?, meter_awal = ?, meter_akhir = ?, status
 	WHERE id_penggunaan = ?`
 
 	res, err := m.DB.Exec(query,
-		data.Id_pelanggan,
+		data.IDPelanggan,
 		data.Bulan,
 		data.Tahun,
 		data.Meter_awal,
@@ -88,26 +88,27 @@ func (m *repository) UpdateOneByID(data *model.Penggunaan) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (m *repository) GetAllByID(id int64) (*model.Penggunaan, error) {
+func (m *repository) GetOneByID(id int64) (*model.Penggunaan, error) {
 	query := `SELECT 
 	id_penggunaan, 
 	id_pelanggan, 
 	bulan, 
 	tahun, 
 	meter_awal, 
-	meter_akhir
+	meter_akhir, status
 	FROM penggunaan  
-	WHERE id = ?`
+	WHERE id_penggunaan = ?`
 
 	data := &model.Penggunaan{}
 
 	if err := m.DB.QueryRow(query, id).Scan(
 		&data.ID,
-		&data.Id_pelanggan,
+		&data.IDPelanggan,
 		&data.Bulan,
 		&data.Tahun,
 		&data.Meter_awal,
 		&data.Meter_akhir,
+		&data.Status,
 	); err != nil {
 		return nil, err
 	}
@@ -115,7 +116,7 @@ func (m *repository) GetAllByID(id int64) (*model.Penggunaan, error) {
 	return data, nil
 }
 
-func (m *repository) GetOneByID(id int64) ([]*model.Penggunaan, error) {
+func (m *repository) GetAllByID(id int64) ([]*model.Penggunaan, error) {
 	var (
 		list_data = make([]*model.Penggunaan, 0)
 	)
@@ -126,8 +127,9 @@ func (m *repository) GetOneByID(id int64) ([]*model.Penggunaan, error) {
 	bulan, 
 	tahun, 
 	meter_awal, 
-	meter_akhir
-	FROM penggunaan  
+	meter_akhir,
+	status
+	FROM penggunaan 
 	WHERE id_penggunaan = ?`
 
 	rows, err := m.DB.Query(query, id)
@@ -138,21 +140,22 @@ func (m *repository) GetOneByID(id int64) ([]*model.Penggunaan, error) {
 
 	for rows.Next() {
 		var (
-			data model.Penggunaan
+			dataPenggunaan model.Penggunaan
 		)
 
 		if err := m.DB.QueryRow(query, id).Scan(
-			&data.ID,
-			&data.Id_pelanggan,
-			&data.Bulan,
-			&data.Tahun,
-			&data.Meter_awal,
-			&data.Meter_akhir,
+			&dataPenggunaan.ID,
+			&dataPenggunaan.IDPelanggan,
+			&dataPenggunaan.Bulan,
+			&dataPenggunaan.Tahun,
+			&dataPenggunaan.Meter_awal,
+			&dataPenggunaan.Meter_akhir,
+			&dataPenggunaan.Status,
 		); err != nil {
 			return nil, err
 		}
 
-		list_data = append(list_data, &data)
+		list_data = append(list_data, &dataPenggunaan)
 	}
 
 	return list_data, nil
@@ -164,16 +167,19 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Penggunaan, 
 	)
 
 	query := `SELECT 
-	id_penggunaan, 
-	id_pelanggan, 
-	bulan, 
-	tahun, 
-	meter_awal, 
-	meter_akhir
-	FROM penggunaan`
+	a.id_penggunaan, 
+	a.id_pelanggan, 
+	a.bulan, 
+	a.tahun, 
+	a.meter_awal, 
+	a.meter_akhir,
+	a.status,
+	b.username, b.nomor_kwh, b.nama_pelanggan, b.alamat
+	FROM penggunaan as a
+	LEFT JOIN pelanggan as b on b.id_pelanggan = a.id_pelanggan `
 
 	if dqp.Search != "" {
-		query += ` WHERE MATCH(bulan, tahun) AGAINST(:search IN NATURAL LANGUAGE MODE)`
+		query += ` WHERE a.status = "Belum Bayar"`
 	}
 	query += ` LIMIT :limit OFFSET :offset`
 
@@ -185,18 +191,32 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Penggunaan, 
 
 	for rows.Next() {
 		var (
-			data model.Penggunaan
+			data          model.Penggunaan
+			dataPelanggan model.Pelanggan
 		)
 
 		if err := rows.Scan(
 			&data.ID,
-			&data.Id_pelanggan,
+			&data.IDPelanggan,
 			&data.Bulan,
 			&data.Tahun,
 			&data.Meter_awal,
 			&data.Meter_akhir,
+			&data.Status,
+			&dataPelanggan.Username,
+			&dataPelanggan.Nomor_kwh,
+			&dataPelanggan.Nama_pelanggan,
+			&dataPelanggan.Alamat,
 		); err != nil {
 			return nil, -1, err
+		}
+
+		data.PelangganDetail = &model.Pelanggan{
+			ID:             data.IDPelanggan,
+			Username:       dataPelanggan.Username,
+			Nama_pelanggan: dataPelanggan.Nama_pelanggan,
+			Alamat:         dataPelanggan.Alamat,
+			Nomor_kwh:      dataPelanggan.Nomor_kwh,
 		}
 
 		list = append(list, &data)

@@ -10,8 +10,8 @@ import (
 // Repository ...
 type Repository interface {
 	Create(data *model.Pembayaran) (int64, error)
-	GetOneByID(id int64) ([]*model.Pembayaran, error)
-	// GetAllByID(id int64) (*model.Pembayaran, error)
+	GetAllByID(id int64) ([]*model.Pembayaran, error)
+	GetOneByID(id int64) (*model.Pembayaran, error)
 	UpdateOneByID(data *model.Pembayaran) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Pembayaran, int, error)
@@ -42,13 +42,13 @@ func (m *repository) Create(data *model.Pembayaran) (int64, error) {
 		id_tagihan, id_pelanggan, tanggal_pembayaran, bulan_bayar, biaya_admin, total_bayar, id_user) VALUES(?, ?, ?, ?, ?, ?, ?)`
 
 	res, err := m.DB.Exec(query,
-		&data.Id_tagihan,
-		&data.Id_pelanggan,
+		&data.IDTagihan,
+		&data.IDPelanggan,
 		&data.Tanggal_pembayaran,
 		&data.Bulan_bayar,
 		&data.Biaya_admin,
 		&data.Total_bayar,
-		&data.Id_user,
+		&data.IDUser,
 	)
 
 	if err != nil {
@@ -69,13 +69,13 @@ func (m *repository) UpdateOneByID(data *model.Pembayaran) (int64, error) {
 	WHERE id_pembayaran = ?`
 
 	res, err := m.DB.Exec(query,
-		data.Id_tagihan,
-		data.Id_pelanggan,
+		data.IDTagihan,
+		data.IDPelanggan,
 		data.Tanggal_pembayaran,
 		data.Bulan_bayar,
 		data.Biaya_admin,
 		data.Total_bayar,
-		data.Id_user,
+		data.IDUser,
 		data.ID,
 	)
 
@@ -91,7 +91,7 @@ func (m *repository) UpdateOneByID(data *model.Pembayaran) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (m *repository) GetOneByID(id int64) ([]*model.Pembayaran, error) {
+func (m *repository) GetAllByID(id int64) ([]*model.Pembayaran, error) {
 	var (
 		list_data = make([]*model.Pembayaran, 0)
 	)
@@ -114,13 +114,13 @@ func (m *repository) GetOneByID(id int64) ([]*model.Pembayaran, error) {
 
 		if err := rows.Scan(
 			&data.ID,
-			&data.Id_tagihan,
-			&data.Id_pelanggan,
+			&data.IDTagihan,
+			&data.IDPelanggan,
 			&data.Tanggal_pembayaran,
 			&data.Bulan_bayar,
 			&data.Biaya_admin,
 			&data.Total_bayar,
-			&data.Id_user,
+			&data.IDUser,
 		); err != nil {
 			return nil, err
 		}
@@ -131,27 +131,29 @@ func (m *repository) GetOneByID(id int64) ([]*model.Pembayaran, error) {
 	return list_data, nil
 }
 
-// func (m *repository) GetAllByID(id int64) (*model.Pembayaran, error) {
-// 	query := `SELECT
-// 	id,
-// 	COALESCE(kode_seksi, ''),
-// 	COALESCE(nama_seksi, ''),
-// 	id_parent_subdirektorat
-// 	FROM pembayaran
-// 	WHERE id = ?`
+func (m *repository) GetOneByID(id int64) (*model.Pembayaran, error) {
+	query := `SELECT 
+	id_pembayaran, id_tagihan, id_pelanggan, tanggal_pembayaran, bulan_bayar, biaya_admin, total_bayar, id_user
+	FROM pembayaran  
+	WHERE id_pembayaran = ?`
 
-// 	data := &model.Pembayaran{}
+	data := &model.Pembayaran{}
 
-// 	if err := m.DB.QueryRow(query, id).Scan(
-// 		&data.ID,
-// 		&data.Kodesubdirektorat,
-// 		&data.Namasubdirektorat,
-// 	); err != nil {
-// 		return nil, err
-// 	}
+	if err := m.DB.QueryRow(query, id).Scan(
+		&data.ID,
+		&data.IDTagihan,
+		&data.IDPelanggan,
+		&data.Tanggal_pembayaran,
+		&data.Bulan_bayar,
+		&data.Biaya_admin,
+		&data.Total_bayar,
+		&data.IDUser,
+	); err != nil {
+		return nil, err
+	}
 
-// 	return data, nil
-// }
+	return data, nil
+}
 
 func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Pembayaran, int, error) {
 	var (
@@ -159,15 +161,20 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Pembayaran, 
 	)
 
 	query := `SELECT 
-	id_pembayaran, 
-	id_tagihan, 
-	id_pelanggan, 
-	tanggal_pembayaran, 
-	bulan_bayar, 
-	biaya_admin, 
-	total_bayar, 
-	id_user
-	FROM pembayaran`
+	a.id_pembayaran, 
+	a.id_tagihan, 
+	a.id_pelanggan, 
+	a.tanggal_pembayaran, 
+	a.bulan_bayar, 
+	a.biaya_admin, 
+	a.total_bayar, 
+	a.id_user,
+	b.status,
+	d.nama_pelanggan
+	FROM pembayaran as a
+	LEFT JOIN tagihan as b on b.id_tagihan = a.id_tagihan
+	LEFT JOIN penggunaan as c on c.id_penggunaan = b.id_penggunaan
+	LEFT JOIN pelanggan as d on d.id_pelanggan = c.id_pelanggan`
 
 	if dqp.Search != "" {
 		query += ` WHERE MATCH(tanggal_pembayaran, bulan_bayar) AGAINST(:search IN NATURAL LANGUAGE MODE)`
@@ -182,22 +189,32 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Pembayaran, 
 
 	for rows.Next() {
 		var (
-			data model.Pembayaran
+			data          model.Pembayaran
+			dataPelanggan model.Pelanggan
+			dataTagihan   model.Tagihan
 		)
 
 		if err := rows.Scan(
 			&data.ID,
-			&data.Id_tagihan,
-			&data.Id_pelanggan,
+			&data.IDTagihan,
+			&data.IDPelanggan,
 			&data.Tanggal_pembayaran,
 			&data.Bulan_bayar,
 			&data.Biaya_admin,
 			&data.Total_bayar,
-			&data.Id_user,
+			&data.IDUser,
+			&dataTagihan.Status,
+			&dataPelanggan.Nama_pelanggan,
 		); err != nil {
 			return nil, -1, err
 		}
 
+		data.TagihanDetail = &model.Tagihan{
+			Status: dataTagihan.Status,
+		}
+		data.PelangganDetail = &model.Pelanggan{
+			Nama_pelanggan: dataPelanggan.Nama_pelanggan,
+		}
 		list = append(list, &data)
 	}
 

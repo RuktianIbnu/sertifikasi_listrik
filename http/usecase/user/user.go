@@ -9,7 +9,7 @@ import (
 // Usecase ...
 type Usecase interface {
 	Create(data *model.User) error
-	GetOneByID(id int64) ([]*model.User, error)
+	GetOneByID(id int64) (*model.User, error)
 	UpdateOneByID(data *model.User) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.User, int, error)
@@ -49,7 +49,7 @@ func (m *usecase) UpdateOneByID(data *model.User) (int64, error) {
 	return rowsAffected, err
 }
 
-func (m *usecase) GetOneByID(id int64) ([]*model.User, error) {
+func (m *usecase) GetOneByID(id int64) (*model.User, error) {
 	return m.userRepo.GetOneByID(id)
 }
 

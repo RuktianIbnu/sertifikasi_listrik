@@ -10,8 +10,8 @@ import (
 // Repository ...
 type Repository interface {
 	Create(data *model.Tagihan) (int64, error)
-	GetOneByID(id int64) ([]*model.Tagihan, error)
-	// GetAllByID(id int64) (*model.Tagihan, error)
+	GetOneByID(id int64) (*model.Tagihan, error)
+	GetAllByID(id int64) ([]*model.Tagihan, error)
 	UpdateOneByID(data *model.Tagihan) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int, error)
@@ -42,8 +42,8 @@ func (m *repository) Create(data *model.Tagihan) (int64, error) {
 		id_penggunaan, id_pelanggan, bulan, tahun, jumlah_meter, status) VALUES(?, ?, ?, ?, ?, ?)`
 
 	res, err := m.DB.Exec(query,
-		&data.Id_penggunaan,
-		&data.Id_pelanggan,
+		&data.IDPenggunaan,
+		&data.IDPelanggan,
 		&data.Bulan,
 		&data.Tahun,
 		&data.Jumlah_meter,
@@ -68,8 +68,8 @@ func (m *repository) UpdateOneByID(data *model.Tagihan) (int64, error) {
 	WHERE id_tagihan = ?`
 
 	res, err := m.DB.Exec(query,
-		data.Id_penggunaan,
-		data.Id_pelanggan,
+		data.IDPenggunaan,
+		data.IDPelanggan,
 		data.Bulan,
 		data.Tahun,
 		data.Jumlah_meter,
@@ -89,7 +89,36 @@ func (m *repository) UpdateOneByID(data *model.Tagihan) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (m *repository) GetOneByID(id_tagihan int64) ([]*model.Tagihan, error) {
+func (m *repository) GetOneByID(id_tagihan int64) (*model.Tagihan, error) {
+	query := `SELECT 
+	id_tagihan, 
+	id_penggunaan,
+	id_pelanggan,
+	bulan,
+	tahun,
+	jumlah_meter,
+	status
+	FROM tagihan  
+	WHERE id_tagihan = ?`
+
+	data := &model.Tagihan{}
+
+	if err := m.DB.QueryRow(query, id_tagihan).Scan(
+		&data.ID,
+		&data.IDPenggunaan,
+		&data.IDPelanggan,
+		&data.Bulan,
+		&data.Tahun,
+		&data.Jumlah_meter,
+		&data.Status,
+	); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func (m *repository) GetAllByID(id int64) ([]*model.Tagihan, error) {
 	var (
 		list_data = make([]*model.Tagihan, 0)
 	)
@@ -105,7 +134,7 @@ func (m *repository) GetOneByID(id_tagihan int64) ([]*model.Tagihan, error) {
 	FROM tagihan  
 	WHERE id_tagihan = ?`
 
-	rows, err := m.DB.Query(query, id_tagihan)
+	rows, err := m.DB.Query(query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -116,10 +145,10 @@ func (m *repository) GetOneByID(id_tagihan int64) ([]*model.Tagihan, error) {
 			data model.Tagihan
 		)
 
-		if err := rows.Scan(
+		if err := m.DB.QueryRow(query, id).Scan(
 			&data.ID,
-			&data.Id_penggunaan,
-			&data.Id_pelanggan,
+			&data.IDPenggunaan,
+			&data.IDPelanggan,
 			&data.Bulan,
 			&data.Tahun,
 			&data.Jumlah_meter,
@@ -127,34 +156,11 @@ func (m *repository) GetOneByID(id_tagihan int64) ([]*model.Tagihan, error) {
 		); err != nil {
 			return nil, err
 		}
-
 		list_data = append(list_data, &data)
 	}
 
 	return list_data, nil
 }
-
-// func (m *repository) GetAllByID(id int64) (*model.Tagihan, error) {
-// 	query := `SELECT
-// 	id,
-// 	COALESCE(kode_seksi, ''),
-// 	COALESCE(nama_seksi, ''),
-// 	id_parent_subdirektorat
-// 	FROM ms_seksi
-// 	WHERE id = ?`
-
-// 	data := &model.Tagihan{}
-
-// 	if err := m.DB.QueryRow(query, id).Scan(
-// 		&data.ID,
-// 		&data.Kodesubdirektorat,
-// 		&data.Namasubdirektorat,
-// 	); err != nil {
-// 		return nil, err
-// 	}
-
-// 	return data, nil
-// }
 
 func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int, error) {
 	var (
@@ -162,17 +168,20 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int
 	)
 
 	query := `SELECT 
-	id_tagihan,
-	id_penggunaan,
-	id_pelanggan,
-	bulan,
-	tahun,
-	jumlah_meter,
-	status 
-	FROM tagihan`
+	a.id_tagihan,
+	a.id_penggunaan,
+	a.id_pelanggan,
+	a.bulan,
+	a.tahun,
+	a.jumlah_meter,
+	a.status,
+	c.nama_pelanggan, c.nomor_kwh
+	FROM tagihan as a
+	LEFT JOIN penggunaan as b on b.id_penggunaan = a.id_penggunaan
+	LEFT JOIN pelanggan as c on c.id_pelanggan = b.id_pelanggan`
 
 	if dqp.Search != "" {
-		query += ` WHERE MATCH(bulan, tahun) AGAINST(:search IN NATURAL LANGUAGE MODE)`
+		query += ` WHERE MATCH(bulan, tahun, status, username) AGAINST(:search IN NATURAL LANGUAGE MODE)`
 	}
 	query += ` LIMIT :limit OFFSET :offset`
 
@@ -184,19 +193,27 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int
 
 	for rows.Next() {
 		var (
-			data model.Tagihan
+			data          model.Tagihan
+			dataPelanggan model.Pelanggan
 		)
 
 		if err := rows.Scan(
 			&data.ID,
-			&data.Id_penggunaan,
-			&data.Id_pelanggan,
+			&data.IDPenggunaan,
+			&data.IDPelanggan,
 			&data.Bulan,
 			&data.Tahun,
 			&data.Jumlah_meter,
 			&data.Status,
+			&dataPelanggan.Username,
+			&dataPelanggan.Nomor_kwh,
 		); err != nil {
 			return nil, -1, err
+		}
+
+		data.PelangganDetail = &model.Pelanggan{
+			Username:  dataPelanggan.Username,
+			Nomor_kwh: dataPelanggan.Nomor_kwh,
 		}
 
 		list = append(list, &data)

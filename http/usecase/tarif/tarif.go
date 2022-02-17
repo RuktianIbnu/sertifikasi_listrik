@@ -9,7 +9,7 @@ import (
 // Usecase ...
 type Usecase interface {
 	Create(data *model.Tarif) (int64, error)
-	GetOneByID(id int64) ([]*model.Tarif, error)
+	GetOneByID(id int64) (*model.Tarif, error)
 	UpdateOneByID(data *model.Tarif) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Tarif, int, error)
@@ -41,7 +41,7 @@ func (m *usecase) UpdateOneByID(data *model.Tarif) (int64, error) {
 	return rowsAffected, err
 }
 
-func (m *usecase) GetOneByID(id int64) ([]*model.Tarif, error) {
+func (m *usecase) GetOneByID(id int64) (*model.Tarif, error) {
 
 	data_seksi, err := m.tarifRepo.GetOneByID(id)
 	if err != nil {

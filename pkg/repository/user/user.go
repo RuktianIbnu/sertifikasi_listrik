@@ -13,7 +13,8 @@ type Repository interface {
 	Create(data *model.User) (int64, error)
 	UpdateOneByID(data *model.User) (int64, error)
 	GetUserMetadataByIdUser(username string) (*model.User, error)
-	GetOneByID(id int64) ([]*model.User, error)
+	GetOneByID(id int64) (*model.User, error)
+	GetAllByID(id int64) ([]*model.User, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.User, int, error)
 	DeleteOneByID(id int64) (int64, error)
 	getTotalCount() (totalEntries int)
@@ -139,7 +140,26 @@ func (m *repository) DeleteOneByID(id int64) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (m *repository) GetOneByID(id int64) ([]*model.User, error) {
+func (m *repository) GetOneByID(id int64) (*model.User, error) {
+	query := `SELECT
+	id_user, username, nama_admin, id_level
+	FROM user
+	WHERE id_user = ?`
+
+	data := &model.User{}
+	if err := m.DB.QueryRow(query, id).Scan(
+		&data.ID,
+		&data.Username,
+		&data.Nama_admin,
+		&data.IDLevel,
+	); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func (m *repository) GetAllByID(id int64) ([]*model.User, error) {
 	var (
 		list_data = make([]*model.User, 0)
 	)

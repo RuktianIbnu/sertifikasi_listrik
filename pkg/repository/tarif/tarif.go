@@ -10,8 +10,8 @@ import (
 // Repository ...
 type Repository interface {
 	Create(data *model.Tarif) (int64, error)
-	GetOneByID(id int64) ([]*model.Tarif, error)
-	GetAllByID(id int64) (*model.Tarif, error)
+	GetAllByID(id int64) ([]*model.Tarif, error)
+	GetOneByID(id int64) (*model.Tarif, error)
 	UpdateOneByID(data *model.Tarif) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Tarif, int, error)
@@ -80,7 +80,7 @@ func (m *repository) UpdateOneByID(data *model.Tarif) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (m *repository) GetOneByID(id int64) ([]*model.Tarif, error) {
+func (m *repository) GetAllByID(id int64) ([]*model.Tarif, error) {
 	var (
 		list_data = make([]*model.Tarif, 0)
 	)
@@ -117,7 +117,7 @@ func (m *repository) GetOneByID(id int64) ([]*model.Tarif, error) {
 	return list_data, nil
 }
 
-func (m *repository) GetAllByID(id int64) (*model.Tarif, error) {
+func (m *repository) GetOneByID(id int64) (*model.Tarif, error) {
 	query := `SELECT
 	id_tarif, 
 	daya,
