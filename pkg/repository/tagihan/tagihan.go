@@ -181,7 +181,7 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int
 	LEFT JOIN pelanggan as c on c.id_pelanggan = b.id_pelanggan`
 
 	if dqp.Search != "" {
-		query += ` WHERE MATCH(bulan, tahun, status, username) AGAINST(:search IN NATURAL LANGUAGE MODE)`
+		query += ` WHERE a.status = "Belum Bayar"`
 	}
 	query += ` LIMIT :limit OFFSET :offset`
 

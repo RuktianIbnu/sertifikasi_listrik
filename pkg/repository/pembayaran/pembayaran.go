@@ -3,6 +3,7 @@ package pembayaran
 import (
 	"sertifikasi_listrik/pkg/helper"
 	"sertifikasi_listrik/pkg/model"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -38,6 +39,9 @@ func (m *repository) getTotalCount() (totalEntries int) {
 }
 
 func (m *repository) Create(data *model.Pembayaran) (int64, error) {
+	currentTime := time.Now()
+	data.Tanggal_pembayaran = &currentTime
+
 	query := `INSERT INTO pembayaran(
 		id_tagihan, id_pelanggan, tanggal_pembayaran, bulan_bayar, biaya_admin, total_bayar, id_user) VALUES(?, ?, ?, ?, ?, ?, ?)`
 
