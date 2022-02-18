@@ -42,12 +42,10 @@ func (m *handler) Create(c *gin.Context) {
 		return
 	}
 
-	// lastID, err := m.pemabayaranUc.Create(&data)
 	if err := m.pemabayaranUc.Create(&data); err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
 	}
-
 	c.JSON(resp.Format(http.StatusOK, nil, data))
 }
 

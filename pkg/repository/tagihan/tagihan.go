@@ -13,6 +13,7 @@ type Repository interface {
 	GetOneByID(id int64) (*model.Tagihan, error)
 	GetAllByID(id int64) ([]*model.Tagihan, error)
 	UpdateOneByID(data *model.Tagihan) (int64, error)
+	UpdateStatus(id int64) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int, error)
 	getTotalCount() (totalEntries int)
@@ -60,6 +61,27 @@ func (m *repository) Create(data *model.Tagihan) (int64, error) {
 	}
 
 	return lastID, nil
+}
+
+func (m *repository) UpdateStatus(id int64) (int64, error) {
+	query := `UPDATE tagihan set
+	status = "Sudah Bayar"
+	WHERE id_tagihan = ?`
+
+	res, err := m.DB.Exec(query,
+		id,
+	)
+
+	if err != nil {
+		return -1, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return -1, err
+	}
+
+	return rowsAffected, nil
 }
 
 func (m *repository) UpdateOneByID(data *model.Tagihan) (int64, error) {

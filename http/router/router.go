@@ -75,12 +75,14 @@ func Routes() *gin.Engine {
 			resources.POST("/penggunaan", penggunaanHandler.Create)
 			resources.GET("/penggunaan/:id", penggunaanHandler.GetOneByID)
 			resources.PUT("/penggunaan/:id", penggunaanHandler.UpdateOneByID)
+			resources.PUT("/penggunaan_status/:id", penggunaanHandler.UpdateStatus)
 			resources.DELETE("/penggunaan/:id", penggunaanHandler.DeleteOneByID)
 			resources.GET("/penggunaan", penggunaanHandler.GetAll)
 
 			resources.POST("/tagihan", tagihanHandler.Create)
 			resources.GET("/tagihan/:id", tagihanHandler.GetOneByID)
 			resources.PUT("/tagihan/:id", tagihanHandler.UpdateOneByID)
+			resources.PUT("/tagihan_status/:id", tagihanHandler.UpdateStatus)
 			resources.DELETE("/tagihan/:id", tagihanHandler.DeleteOneByID)
 			resources.GET("/tagihan", tagihanHandler.GetAll)
 

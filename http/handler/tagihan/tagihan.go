@@ -17,6 +17,7 @@ type Handler interface {
 	Create(c *gin.Context)
 	GetOneByID(c *gin.Context)
 	UpdateOneByID(c *gin.Context)
+	UpdateStatus(c *gin.Context)
 	DeleteOneByID(c *gin.Context)
 	GetAll(c *gin.Context)
 }
@@ -78,6 +79,25 @@ func (m *handler) UpdateOneByID(c *gin.Context) {
 	}
 
 	c.JSON(resp.Format(http.StatusOK, nil, data))
+}
+
+func (m *handler) UpdateStatus(c *gin.Context) {
+	var (
+		ids, _ = strconv.ParseInt(c.Param("id"), 10, 64)
+	)
+
+	if ids <= 0 {
+		c.JSON(resp.Format(http.StatusBadRequest, errors.New("Provide a Valid ID")))
+		return
+	}
+
+	_, err := m.tagihanUc.UpdateStatus(ids)
+	if err != nil {
+		c.JSON(resp.Format(http.StatusInternalServerError, err))
+		return
+	}
+
+	c.JSON(resp.Format(http.StatusOK, nil))
 }
 
 func (m *handler) GetOneByID(c *gin.Context) {

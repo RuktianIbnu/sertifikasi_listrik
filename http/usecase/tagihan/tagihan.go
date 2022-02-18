@@ -14,6 +14,7 @@ type Usecase interface {
 	Create(data *model.Tagihan) (int64, error)
 	GetOneByID(id int64) (*model.Tagihan, error)
 	UpdateOneByID(data *model.Tagihan) (int64, error)
+	UpdateStatus(id int64) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int, error)
 }
@@ -37,6 +38,17 @@ func NewUsecase() Usecase {
 
 func (m *usecase) Create(data *model.Tagihan) (int64, error) {
 	return m.tagihanRepo.Create(data)
+}
+
+func (m *usecase) UpdateStatus(id int64) (int64, error) {
+
+	rowsAffected, err := m.tagihanRepo.UpdateStatus(id)
+
+	if rowsAffected <= 0 {
+		return rowsAffected, errors.New("no rows affected or data not found")
+	}
+
+	return rowsAffected, err
 }
 
 func (m *usecase) UpdateOneByID(data *model.Tagihan) (int64, error) {

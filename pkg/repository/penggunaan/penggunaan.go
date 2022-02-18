@@ -13,6 +13,7 @@ type Repository interface {
 	GetOneByID(id int64) (*model.Penggunaan, error)
 	GetAllByID(id int64) ([]*model.Penggunaan, error)
 	UpdateOneByID(data *model.Penggunaan) (int64, error)
+	UpdateStatus(id int64) (int64, error)
 	DeleteOneByID(id int64) (int64, error)
 	GetAll(dqp *model.DefaultQueryParam) ([]*model.Penggunaan, int, error)
 	getTotalCount() (totalEntries int)
@@ -62,9 +63,29 @@ func (m *repository) Create(data *model.Penggunaan) (int64, error) {
 	return lastID, nil
 }
 
+func (m *repository) UpdateStatus(id int64) (int64, error) {
+	query := `UPDATE penggunaan set status = "Sudah Bayar"
+	WHERE id_penggunaan = ?`
+
+	res, err := m.DB.Exec(query,
+		id,
+	)
+
+	if err != nil {
+		return -1, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return -1, err
+	}
+
+	return rowsAffected, nil
+}
+
 func (m *repository) UpdateOneByID(data *model.Penggunaan) (int64, error) {
 	query := `UPDATE penggunaan set
-	id_pelanggan = ?, bulan = ?, tahun = ?, meter_awal = ?, meter_akhir = ?, status
+	id_pelanggan = ?, bulan = ?, tahun = ?, meter_awal = ?, meter_akhir = ?
 	WHERE id_penggunaan = ?`
 
 	res, err := m.DB.Exec(query,
