@@ -67,17 +67,18 @@ type Pelanggan struct {
 
 // Pembayaran ...
 type Pembayaran struct {
-	ID                 int64      `json:"id_pembayaran"`
-	IDTagihan          int64      `json:"id_tagihan"`
-	IDPelanggan        int64      `json:"id_pelanggan"`
-	Tanggal_pembayaran *time.Time `json:"tanggal_pembayaran"`
-	Bulan_bayar        string     `json:"bulan_bayar"`
-	Biaya_admin        string     `json:"biaya_admin"`
-	Total_bayar        float64    `json:"total_bayar"`
-	IDUser             int64      `json:"id_user"`
-	PelangganDetail    *Pelanggan `json:"pelanggan_detail"`
-	TagihanDetail      *Tagihan   `json:"tagihan_detail"`
-	UserDetail         *Pelanggan `json:"user_detail"`
+	ID                 int64       `json:"id_pembayaran"`
+	IDTagihan          int64       `json:"id_tagihan"`
+	IDPelanggan        int64       `json:"id_pelanggan"`
+	Tanggal_pembayaran *time.Time  `json:"tanggal_pembayaran"`
+	Bulan_bayar        string      `json:"bulan_bayar"`
+	Biaya_admin        string      `json:"biaya_admin"`
+	Total_bayar        float64     `json:"total_bayar"`
+	IDUser             int64       `json:"id_user"`
+	PelangganDetail    *Pelanggan  `json:"pelanggan_detail"`
+	TagihanDetail      *Tagihan    `json:"tagihan_detail"`
+	PenggunaanDetail   *Penggunaan `json:"penggunaan_detail"`
+	UserDetail         *Pelanggan  `json:"user_detail"`
 }
 
 // Level ...

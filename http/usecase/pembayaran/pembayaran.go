@@ -5,6 +5,7 @@ import (
 	"sertifikasi_listrik/pkg/model"
 	rplgn "sertifikasi_listrik/pkg/repository/pelanggan"
 	rp "sertifikasi_listrik/pkg/repository/pembayaran"
+	rpgn "sertifikasi_listrik/pkg/repository/penggunaan"
 	rt "sertifikasi_listrik/pkg/repository/tagihan"
 	ru "sertifikasi_listrik/pkg/repository/user"
 )
@@ -23,6 +24,7 @@ type usecase struct {
 	tagihanRepo    rt.Repository
 	pelangganRepo  rplgn.Repository
 	userRepo       ru.Repository
+	penggunaanRepo rpgn.Repository
 }
 
 // NewUsecase ...
@@ -32,6 +34,7 @@ func NewUsecase() Usecase {
 		rt.NewRepository(),
 		rplgn.NewRepository(),
 		ru.NewRepository(),
+		rpgn.NewRepository(),
 	}
 }
 
@@ -62,6 +65,7 @@ func (m *usecase) GetOneByID(id int64) (*model.Pembayaran, error) {
 		return nil, err
 	}
 
+	//////////////////////get tagihan////////////////////////
 	data_tagihan, err := m.tagihanRepo.GetOneByID(data_pembayaran.IDTagihan)
 	if err != nil {
 		return nil, err
@@ -71,14 +75,23 @@ func (m *usecase) GetOneByID(id int64) (*model.Pembayaran, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	/////////////////////////////////////////////////////////
+	///////////////////////////get pelanggan////////////////
 	pelanggan_detail, err := m.pelangganRepo.GetOneByID(data.IDPelanggan)
 	if err != nil {
 		return nil, err
 	}
+	/////////////////////////////////////////////////////////
+	///////////////////////////get penggunaan////////////////
+	penggunaan_detail, err := m.penggunaanRepo.GetOneByID(data.IDPenggunaan)
+	if err != nil {
+		return nil, err
+	}
+	/////////////////////////////////////////////////////////
 
 	data_pembayaran.PelangganDetail = pelanggan_detail
 	data_pembayaran.TagihanDetail = data_tagihan
+	data_pembayaran.PenggunaanDetail = penggunaan_detail
 
 	return data_pembayaran, nil
 }
