@@ -87,7 +87,7 @@ func (m *handler) UpdateStatus(c *gin.Context) {
 	)
 
 	if ids <= 0 {
-		c.JSON(resp.Format(http.StatusBadRequest, errors.New("Provide a Valid ID")))
+		c.JSON(resp.Format(http.StatusBadRequest, errors.New("Provide a valid ID")))
 		return
 	}
 

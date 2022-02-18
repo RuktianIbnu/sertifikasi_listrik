@@ -68,10 +68,7 @@ func (m *repository) UpdateStatus(id int64) (int64, error) {
 	status = "Sudah Bayar"
 	WHERE id_tagihan = ?`
 
-	res, err := m.DB.Exec(query,
-		id,
-	)
-
+	res, err := m.DB.Exec(query, id)
 	if err != nil {
 		return -1, err
 	}
@@ -197,7 +194,7 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int
 	a.tahun,
 	a.jumlah_meter,
 	a.status,
-	c.nama_pelanggan, c.nomor_kwh
+	c.nama_pelanggan, c.nomor_kwh, b.status
 	FROM tagihan as a
 	LEFT JOIN penggunaan as b on b.id_penggunaan = a.id_penggunaan
 	LEFT JOIN pelanggan as c on c.id_pelanggan = b.id_pelanggan`
@@ -215,8 +212,9 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int
 
 	for rows.Next() {
 		var (
-			data          model.Tagihan
-			dataPelanggan model.Pelanggan
+			data           model.Tagihan
+			dataPelanggan  model.Pelanggan
+			dataPenggunaan model.Penggunaan
 		)
 
 		if err := rows.Scan(
@@ -229,6 +227,7 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int
 			&data.Status,
 			&dataPelanggan.Username,
 			&dataPelanggan.Nomor_kwh,
+			&dataPenggunaan.Status,
 		); err != nil {
 			return nil, -1, err
 		}
@@ -236,6 +235,9 @@ func (m *repository) GetAll(dqp *model.DefaultQueryParam) ([]*model.Tagihan, int
 		data.PelangganDetail = &model.Pelanggan{
 			Username:  dataPelanggan.Username,
 			Nomor_kwh: dataPelanggan.Nomor_kwh,
+		}
+		data.PenggunaanDetail = &model.Penggunaan{
+			Status: dataPenggunaan.Status,
 		}
 
 		list = append(list, &data)

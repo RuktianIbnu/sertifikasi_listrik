@@ -66,7 +66,7 @@ func Routes() *gin.Engine {
 			resources.DELETE("/pelanggan/:id", pelangganHendler.DeleteOneByID)
 			resources.GET("/pelanggan", pelangganHendler.GetAll)
 
-			resources.POST("/pembayaran", pembayaranHandler.Create)
+			resources.POST("/pembayaran/:id/:idt", pembayaranHandler.Create)
 			resources.GET("/pembayaran/:id", pembayaranHandler.GetOneByID)
 			resources.PUT("/pembayaran/:id", pembayaranHandler.UpdateOneByID)
 			resources.DELETE("/pembayaran/:id", pembayaranHandler.DeleteOneByID)

@@ -67,10 +67,7 @@ func (m *repository) UpdateStatus(id int64) (int64, error) {
 	query := `UPDATE penggunaan set status = "Sudah Bayar"
 	WHERE id_penggunaan = ?`
 
-	res, err := m.DB.Exec(query,
-		id,
-	)
-
+	res, err := m.DB.Exec(query, id)
 	if err != nil {
 		return -1, err
 	}

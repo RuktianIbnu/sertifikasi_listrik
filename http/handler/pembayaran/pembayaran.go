@@ -2,8 +2,11 @@ package pembayaran
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	uk "sertifikasi_listrik/http/usecase/pembayaran"
+	up "sertifikasi_listrik/http/usecase/penggunaan"
+	ut "sertifikasi_listrik/http/usecase/tagihan"
 	qry "sertifikasi_listrik/pkg/helper/query"
 	resp "sertifikasi_listrik/pkg/helper/response"
 	"sertifikasi_listrik/pkg/model"
@@ -23,29 +26,61 @@ type Handler interface {
 
 type handler struct {
 	pemabayaranUc uk.Usecase
+	penggunaanUc  up.Usecase
+	tagihanUc     ut.Usecase
 }
 
 // NewHandler ...
 func NewHandler() Handler {
 	return &handler{
 		uk.NewUsecase(),
+		up.NewUsecase(),
+		ut.NewUsecase(),
 	}
 }
 
 func (m *handler) Create(c *gin.Context) {
 	var (
-		data model.Pembayaran
+		data   model.Pembayaran
+		ids, _ = strconv.ParseInt(c.Param("id"), 10, 64)
+		idt, _ = strconv.ParseInt(c.Param("idt"), 10, 64)
 	)
-
+	//////////create pembayaran///////////////////////////
 	if err := c.ShouldBindJSON(&data); err != nil {
 		c.JSON(resp.Format(http.StatusBadRequest, err))
 		return
 	}
-
 	if err := m.pemabayaranUc.Create(&data); err != nil {
 		c.JSON(resp.Format(http.StatusInternalServerError, err))
 		return
 	}
+	//////////////////////////////////////////////////////
+
+	////////update status/////////////////////////////////
+	if ids <= 0 {
+		c.JSON(resp.Format(http.StatusBadRequest, errors.New("Provide a valid ID")))
+		return
+	}
+
+	_, err := m.penggunaanUc.UpdateStatus(ids)
+	if err != nil {
+		c.JSON(resp.Format(http.StatusInternalServerError, err))
+		return
+	}
+	//////////////////////////////////////////////////////
+	////////update status tagihan/////////////////////////////////
+	if ids <= 0 {
+		c.JSON(resp.Format(http.StatusBadRequest, errors.New("Provide a valid ID")))
+		return
+	}
+
+	x, err := m.tagihanUc.UpdateStatus(idt)
+	if err != nil {
+		c.JSON(resp.Format(http.StatusInternalServerError, err))
+		return
+	}
+	fmt.Println(x)
+	//////////////////////////////////////////////////////
 	c.JSON(resp.Format(http.StatusOK, nil, data))
 }
 
